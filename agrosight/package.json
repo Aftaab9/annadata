@@ -7,7 +7,7 @@
     "dev": "node scripts/copy-model.mjs && vite",
     "copy-model": "node scripts/copy-model.mjs",
     "export-fp32-model": "python scripts/export_fp32_tflite.py",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/copy-model.mjs && tsc -b && vite build",
     "preview": "vite preview",
     "test:tflite": "node scripts/test-tflite.mjs"
   },

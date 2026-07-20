@@ -20,13 +20,14 @@ Thumbs.db
 .vscode/
 *.swp
 
-# Models & large binaries (keep README)
+# Models & large binaries (keep README + deploy leaf model)
 *.tflite
 *.onnx
 *.h5
 *.keras
 *.pkl
 !**/models/README.md
+!agrosight/public/models/agrosight_plantvillage.tflite
 
 # Python / Colab junk
 __pycache__/
@@ -39,19 +40,8 @@ npm-debug.log*
 
 .venv*/
 .venv-tfjs/
-__pycache__/
-agent-transcripts/
-.cursor/
-
-
-.venv*/
-.venv-tfjs/
-__pycache__/
-.cursor/
-agent-transcripts/
 pv_data/
 Mock-Images/
 dashboard/
-models/*.tflite
-models/*.keras
-models/*.h5
+.cursor/
+agent-transcripts/
