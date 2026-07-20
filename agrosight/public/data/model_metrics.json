@@ -1,0 +1,64 @@
+{
+  "updated": "2026-07-20",
+  "note": "Only metrics measured in Colab hold-out appear in Insights. Pending = wait for notebook export.",
+  "measured": [
+    {
+      "id": "pv_cv",
+      "value": 97.4,
+      "suffix": "%",
+      "label": "Leaf Health CV accuracy",
+      "how": "PlantVillage hold-out · EfficientNetB0 · composite score winner among 5 architectures",
+      "status": "measured"
+    },
+    {
+      "id": "yield_mape",
+      "value": 3.52,
+      "suffix": "%",
+      "label": "Yield MAPE",
+      "how": "Linear / tree regressor hold-out on processing yield parameters",
+      "status": "measured"
+    },
+    {
+      "id": "beans_pilot",
+      "value": 94.2,
+      "suffix": "%",
+      "label": "Beans pilot accuracy",
+      "how": "Makerere beans 3-class pilot before multi-SKU PlantVillage scale-up",
+      "status": "measured"
+    },
+    {
+      "id": "architectures",
+      "value": 5,
+      "suffix": "",
+      "label": "Architectures compared",
+      "how": "Same splits/epochs — MobileNetV2, EfficientNetB0, ResNet50, DenseNet121, custom CNN",
+      "status": "measured"
+    }
+  ],
+  "pending": [
+    {
+      "id": "produce_cv",
+      "label": "Produce Quality accuracy",
+      "how": "Run colab/01_produce_quality.py → drop metrics into this file",
+      "status": "pending_colab"
+    },
+    {
+      "id": "crop_rec",
+      "label": "Crop recommendation accuracy",
+      "how": "Run colab/02_crop_recommendation.py — replaces fake 91% KPI",
+      "status": "pending_colab"
+    },
+    {
+      "id": "fertilizer",
+      "label": "Fertilizer classifier accuracy",
+      "how": "Run colab/03_fertilizer.py",
+      "status": "pending_colab"
+    },
+    {
+      "id": "price_mape",
+      "label": "Price forecast MAPE",
+      "how": "Run colab/04_price_forecast.py",
+      "status": "pending_colab"
+    }
+  ]
+}

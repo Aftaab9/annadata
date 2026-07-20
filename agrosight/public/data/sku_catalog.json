@@ -1,0 +1,49 @@
+{
+  "defect_classes": [
+    "HEALTHY",
+    "SURFACE_DEFECT",
+    "BLIGHT_MOLD"
+  ],
+  "skus": [
+    {
+      "crop_key": "Corn_(maize)",
+      "sku": "MAIZE_GRAIN",
+      "category": "Grains",
+      "icon": "corn"
+    },
+    {
+      "crop_key": "Soybean",
+      "sku": "SOYBEAN_PULSE",
+      "category": "Pulses",
+      "icon": "soybean"
+    },
+    {
+      "crop_key": "Pepper,_bell",
+      "sku": "PEPPER_SPICE",
+      "category": "Spices",
+      "icon": "pepper"
+    },
+    {
+      "crop_key": "Tomato",
+      "sku": "TOMATO_VEG",
+      "category": "Vegetables",
+      "icon": "tomato"
+    },
+    {
+      "crop_key": "Potato",
+      "sku": "POTATO_VEG",
+      "category": "Vegetables",
+      "icon": "potato"
+    },
+    {
+      "crop_key": "Apple",
+      "sku": "APPLE_FRUIT",
+      "category": "Fruits",
+      "icon": "apple"
+    }
+  ],
+  "source": "mohanty/PlantVillage (color, zip)",
+  "train_images": 4800,
+  "test_images": 720,
+  "disease_classes_in_subset": 9
+}

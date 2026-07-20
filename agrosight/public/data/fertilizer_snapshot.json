@@ -1,0 +1,19 @@
+{
+  "note": "Crop-specific NPK thresholds from Kaggle Fertilizer dataset (Phase 3 lookup)",
+  "source": "lookup",
+  "crops": {
+    "Tomato": { "N": 50, "P": 35, "K": 40 },
+    "Maize": { "N": 55, "P": 38, "K": 42 },
+    "Potato": { "N": 48, "P": 40, "K": 45 },
+    "Onion": { "N": 45, "P": 32, "K": 38 },
+    "Wheat": { "N": 52, "P": 36, "K": 40 },
+    "Soybean": { "N": 40, "P": 42, "K": 44 },
+    "default": { "N": 50, "P": 35, "K": 40 }
+  },
+  "products": {
+    "low_N": { "fertilizer": "Urea (46% N)", "template": "Nitrogen is low ({N} vs ~{target} target) for {crop} — apply urea-based fertilizer in split doses." },
+    "low_P": { "fertilizer": "DAP (18-46-0)", "template": "Phosphorus is low ({P} vs ~{target}) for {crop} — DAP supports root development and flowering." },
+    "low_K": { "fertilizer": "MOP (0-0-60)", "template": "Potassium is low ({K} vs ~{target}) for {crop} — MOP improves fruit quality and stress tolerance." },
+    "balanced": { "fertilizer": "NPK 20-20-0 (maintenance)", "template": "NPK levels look balanced for {crop}. Use maintenance dose and re-test soil after 4 weeks." }
+  }
+}

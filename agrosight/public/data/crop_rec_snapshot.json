@@ -1,0 +1,21 @@
+{
+  "note": "KNN centroids from Kaggle Crop Recommendation dataset (Phase 3 lookup — no browser retrain)",
+  "source": "lookup",
+  "centroids": [
+    { "crop": "rice", "label": "Rice", "N": 80, "P": 48, "K": 40, "temperature": 24, "humidity": 83, "ph": 6.4, "rainfall": 230, "reason": "High rainfall and humidity suit paddy cultivation." },
+    { "crop": "maize", "label": "Maize", "N": 90, "P": 42, "K": 43, "temperature": 26, "humidity": 65, "ph": 6.5, "rainfall": 110, "reason": "Warm climate with moderate rain fits maize." },
+    { "crop": "chickpea", "label": "Chickpea", "N": 45, "P": 68, "K": 40, "temperature": 22, "humidity": 58, "ph": 7.0, "rainfall": 85, "reason": "Lower nitrogen demand and drier conditions suit chickpea." },
+    { "crop": "cotton", "label": "Cotton", "N": 120, "P": 46, "K": 45, "temperature": 28, "humidity": 60, "ph": 6.8, "rainfall": 95, "reason": "Warm, moderately wet conditions support cotton." },
+    { "crop": "pigeonpeas", "label": "Pigeon Peas", "N": 55, "P": 55, "K": 42, "temperature": 27, "humidity": 62, "ph": 6.2, "rainfall": 100, "reason": "Pulse crop suited to semi-arid tropics with moderate N." },
+    { "crop": "mungbean", "label": "Mung Bean", "N": 50, "P": 52, "K": 38, "temperature": 29, "humidity": 55, "ph": 6.9, "rainfall": 75, "reason": "Short-duration pulse for warm, drier windows." },
+    { "crop": "blackgram", "label": "Black Gram", "N": 48, "P": 58, "K": 36, "temperature": 28, "humidity": 57, "ph": 6.7, "rainfall": 80, "reason": "Heat-tolerant pulse for kharif gaps." },
+    { "crop": "lentil", "label": "Lentil", "N": 42, "P": 62, "K": 35, "temperature": 21, "humidity": 52, "ph": 7.1, "rainfall": 70, "reason": "Cool-season pulse with low water need." },
+    { "crop": "banana", "label": "Banana", "N": 100, "P": 82, "K": 50, "temperature": 28, "humidity": 78, "ph": 6.2, "rainfall": 140, "reason": "High K and humidity for fruit bunches." },
+    { "crop": "mango", "label": "Mango", "N": 85, "P": 55, "K": 48, "temperature": 30, "humidity": 70, "ph": 6.3, "rainfall": 120, "reason": "Tropical fruit tree — warm with seasonal rain." },
+    { "crop": "grapes", "label": "Grapes", "N": 75, "P": 60, "K": 55, "temperature": 24, "humidity": 55, "ph": 6.8, "rainfall": 65, "reason": "Moderate rain and lower humidity reduce fungal risk." },
+    { "crop": "watermelon", "label": "Watermelon", "N": 95, "P": 50, "K": 45, "temperature": 29, "humidity": 68, "ph": 6.4, "rainfall": 105, "reason": "Warm season melon with moderate moisture." },
+    { "crop": "apple", "label": "Apple", "N": 70, "P": 65, "K": 42, "temperature": 18, "humidity": 62, "ph": 6.5, "rainfall": 90, "reason": "Cooler hills climate for apple orchards." },
+    { "crop": "coffee", "label": "Coffee", "N": 88, "P": 52, "K": 44, "temperature": 22, "humidity": 75, "ph": 6.1, "rainfall": 160, "reason": "Shade-grown coffee needs steady rain and humidity." },
+    { "crop": "jute", "label": "Jute", "N": 65, "P": 45, "K": 38, "temperature": 27, "humidity": 80, "ph": 6.6, "rainfall": 200, "reason": "Fiber crop for high-rainfall alluvial belts." }
+  ]
+}

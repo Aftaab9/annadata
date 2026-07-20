@@ -1,0 +1,609 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* DESIGN.md tokens — Annadata / AgroSight */
+:root {
+  --bg: oklch(0.11 0.015 145);
+  --bg-2: oklch(0.13 0.018 145);
+  --surface: color-mix(in oklch, oklch(0.16 0.02 145) 85%, transparent);
+  --surface-solid: oklch(0.16 0.02 145);
+  --surface-2: oklch(0.19 0.022 145);
+  --surface-3: oklch(0.22 0.024 145);
+  --border: oklch(0.93 0.01 145 / 0.1);
+  --border-2: oklch(0.93 0.01 145 / 0.18);
+  --text: oklch(0.93 0.012 100);
+  --muted: oklch(0.72 0.02 145);
+  --dim: oklch(0.5 0.02 145);
+
+  /* ONE accent */
+  --accent: oklch(0.74 0.13 175);
+  --accent-2: oklch(0.78 0.12 145);
+  --cyan: var(--accent);
+  --teal: var(--accent-2);
+  /* Legacy class names → accent family (kills purple) */
+  --indigo: oklch(0.7 0.11 175);
+  --violet: oklch(0.76 0.1 160);
+
+  --harvest: oklch(0.78 0.14 75);
+  --grain: oklch(0.82 0.14 95);
+  --earth: oklch(0.55 0.08 70);
+  --healthy: oklch(0.72 0.16 155);
+  --warning: oklch(0.78 0.14 75);
+  --danger: oklch(0.65 0.18 25);
+
+  --glow-indigo: color-mix(in oklch, var(--accent) 40%, transparent);
+  --glow-cyan: color-mix(in oklch, var(--accent) 35%, transparent);
+  --glow-green: color-mix(in oklch, var(--healthy) 40%, transparent);
+  --glow-harvest: color-mix(in oklch, var(--harvest) 40%, transparent);
+
+  --radius: 12px;
+  --radius-lg: 16px;
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-in: cubic-bezier(0.32, 0, 0.67, 0);
+  --dur-hover: 140ms;
+  --dur-toggle: 240ms;
+  --dur-modal: 380ms;
+
+  --font-display: 'Syne', system-ui, sans-serif;
+  --font-ui: 'Sora', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .aurora-blob {
+    animation: none !important;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-numeric: tabular-nums;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+h1,
+h2,
+.font-display {
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Atmosphere: CSS aurora (Prompt 10) — hero only */
+.aurora-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  mix-blend-mode: screen;
+  opacity: 0.45;
+  will-change: transform;
+}
+
+.aurora-blob-a {
+  width: 55vw;
+  height: 55vw;
+  left: -15%;
+  top: -20%;
+  background: oklch(0.55 0.12 175 / 0.55);
+  animation: aurora-drift-a 18s var(--ease-out) infinite alternate;
+}
+
+.aurora-blob-b {
+  width: 45vw;
+  height: 45vw;
+  right: -10%;
+  top: 10%;
+  background: oklch(0.5 0.1 145 / 0.5);
+  animation: aurora-drift-b 22s var(--ease-out) infinite alternate;
+}
+
+.aurora-blob-c {
+  width: 40vw;
+  height: 40vw;
+  left: 30%;
+  bottom: -15%;
+  background: oklch(0.48 0.08 95 / 0.4);
+  animation: aurora-drift-c 25s var(--ease-out) infinite alternate;
+}
+
+@keyframes aurora-drift-a {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(8%, 12%) scale(1.08);
+  }
+}
+
+@keyframes aurora-drift-b {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(-10%, 6%) scale(1.05);
+  }
+}
+
+@keyframes aurora-drift-c {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(5%, -10%) scale(1.1);
+  }
+}
+
+/* Felt grain — not seen */
+.grain-overlay {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.bg-grid {
+  background-image: radial-gradient(oklch(0.93 0.01 145 / 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Solid surfaces for dense UI */
+.surface {
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Glass — nav / floating only (Prompt 6) */
+.glass,
+.glass-strong {
+  background: oklch(0.16 0.02 145 / 0.55);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  border: 1px solid oklch(0.93 0.01 145 / 0.15);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.08);
+}
+
+.glass-strong {
+  background: oklch(0.18 0.02 145 / 0.72);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass,
+  .glass-strong {
+    background: var(--surface-2);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-strong {
+    background: var(--surface-2);
+    backdrop-filter: none;
+  }
+}
+
+/* Brand text — no purple gradient */
+.gradient-text,
+.brand-text {
+  color: var(--text);
+  background: linear-gradient(
+    135deg,
+    oklch(0.96 0.01 100) 0%,
+    oklch(0.82 0.08 175) 55%,
+    oklch(0.78 0.1 145) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@supports not (background-clip: text) {
+  .gradient-text,
+  .brand-text {
+    color: #3dd6c3;
+    background: none;
+    -webkit-text-fill-color: unset;
+  }
+}
+
+/* Mobile: solid brand color — gradient clip often truncates glyphs */
+@media (max-width: 640px) {
+  .brand-text {
+    color: #e8f7f4;
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: #e8f7f4;
+  }
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.section-label::before {
+  content: '— ';
+  opacity: 0.6;
+}
+
+/* Shimmer skeleton (Prompt 8) */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+  border-radius: 8px;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.93 0.01 145 / 0.08) 40%,
+    oklch(0.93 0.01 145 / 0.14) 50%,
+    oklch(0.93 0.01 145 / 0.08) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s var(--ease-out) infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+/* Bento cell hover */
+.bento-cell {
+  transition:
+    transform var(--dur-toggle) var(--ease-out),
+    border-color var(--dur-hover) var(--ease-out);
+}
+
+.bento-cell:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklch, var(--accent) 40%, transparent);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-2);
+  border-radius: 3px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ——— FX: Spotlight ——— */
+.spotlight-wrap {
+  position: relative;
+  background: radial-gradient(
+    600px circle at var(--spot-x) var(--spot-y),
+    color-mix(in oklch, var(--accent) 10%, transparent),
+    transparent 40%
+  );
+}
+
+/* ——— FX: Clip-path reveals ——— */
+.reveal-clip {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.9s cubic-bezier(0.77, 0, 0.18, 1);
+}
+
+.reveal-clip.visible {
+  clip-path: inset(0 0% 0 0);
+}
+
+.reveal-right {
+  clip-path: inset(0 0 0 100%);
+}
+
+.reveal-right.visible {
+  clip-path: inset(0 0 0 0);
+}
+
+.reveal-top {
+  clip-path: inset(0 0 100% 0);
+}
+
+.reveal-top.visible {
+  clip-path: inset(0 0 0 0);
+}
+
+.reveal-bottom {
+  clip-path: inset(100% 0 0 0);
+}
+
+.reveal-bottom.visible {
+  clip-path: inset(0 0 0 0);
+}
+
+.reveal-immediate {
+  clip-path: none;
+  opacity: 1;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.magnetic-btn {
+  cursor: pointer;
+}
+
+.tilt-card {
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.tilt-card-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at var(--glare-x, 50%) var(--glare-y, 50%),
+    oklch(1 0 0 / 0.1),
+    transparent 60%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-hover) var(--ease-out);
+}
+
+.tilt-card:hover .tilt-card-glare {
+  opacity: 1;
+}
+
+.scan-overlay .scan-corner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: var(--accent);
+  border-style: solid;
+}
+
+.scan-corner-tl {
+  top: 12px;
+  left: 12px;
+  border-width: 2px 0 0 2px;
+}
+
+.scan-corner-tr {
+  top: 12px;
+  right: 12px;
+  border-width: 2px 2px 0 0;
+}
+
+.scan-corner-bl {
+  bottom: 12px;
+  left: 12px;
+  border-width: 0 0 2px 2px;
+}
+
+.scan-corner-br {
+  bottom: 12px;
+  right: 12px;
+  border-width: 0 2px 2px 0;
+}
+
+.scan-line {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  box-shadow: 0 0 12px var(--glow-cyan);
+  animation: scan-sweep 2s ease-in-out infinite;
+}
+
+@keyframes scan-sweep {
+  0% {
+    top: 15%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 85%;
+    opacity: 0;
+  }
+}
+
+.assistant-orb {
+  animation: orb-pulse 3s ease-in-out infinite;
+}
+
+@keyframes orb-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 28px var(--glow-cyan);
+  }
+  50% {
+    box-shadow: 0 0 48px var(--glow-green);
+  }
+}
+
+.live-dot {
+  animation: live-blink 1.2s ease-in-out infinite;
+}
+
+@keyframes live-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.capture-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-clip {
+    clip-path: none !important;
+  }
+
+  .scan-line,
+  .assistant-orb,
+  .live-dot,
+  .bottleneck-pulse,
+  .pipeline-banner,
+  .skeleton::after {
+    animation: none !important;
+  }
+}
+
+.yield-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    var(--thumb-color) 0%,
+    var(--thumb-color) var(--track-percent),
+    var(--surface-2) var(--track-percent),
+    var(--surface-2) 100%
+  );
+  outline: none;
+}
+
+.yield-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--thumb-color);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 12px color-mix(in oklch, var(--thumb-color) 60%, transparent);
+  cursor: pointer;
+  transition: transform var(--dur-hover) var(--ease-out);
+}
+
+.yield-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.yield-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--thumb-color);
+  border: 2px solid var(--bg);
+  cursor: pointer;
+}
+
+.pipeline-banner {
+  animation: pipeline-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes pipeline-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px color-mix(in oklch, var(--accent) 15%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 36px color-mix(in oklch, var(--accent) 35%, transparent);
+  }
+}
+
+.bottleneck-pulse {
+  animation: bottleneck-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes bottleneck-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--warning) 20%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 24px 4px color-mix(in oklch, var(--warning) 25%, transparent);
+  }
+}
