@@ -1,0 +1,6 @@
+# Keep local CLI deploys under GitHub size / speed limits
+public/models/agrosight_produce.tflite
+public/models/agrosight_produce_threeway_backup.tflite
+node_modules
+dist
+.vercel

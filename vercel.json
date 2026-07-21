@@ -1,0 +1,19 @@
+{
+  "framework": "vite",
+  "installCommand": "npm install --prefix agrosight",
+  "buildCommand": "npm run build --prefix agrosight",
+  "outputDirectory": "agrosight/dist",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Embedder-Policy", "value": "credentialless" }
+      ]
+    }
+  ]
+}
