@@ -30,6 +30,8 @@ Restart `npm run dev`.
 
 ## 5. Verify
 Open `/market` — badge should say **Live · Supabase (multi-device)**.  
+If the table is empty, the app **auto-seeds 12 demo listings** (Agmarknet-anchored prices). You can also re-run the seed `INSERT` block at the bottom of `listings.sql`.
+
 Publish on one browser / phone, Refresh (or wait for realtime) on another.
 
 ## If keys missing
