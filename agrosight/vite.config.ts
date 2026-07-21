@@ -56,9 +56,14 @@ export default defineConfig(({ mode }) => {
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,wasm,js}'],
-        globIgnores: ['**/models/*.tflite'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // Do not precache ONNX Runtime WASM (~24MB) — runtime-cache instead
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
+        globIgnores: [
+          '**/models/*.tflite',
+          '**/ort*.wasm',
+          '**/ort*.mjs',
+        ],
+        maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: /\/models\/.*\.tflite$/i,
@@ -81,6 +86,18 @@ export default defineConfig(({ mode }) => {
                 maxEntries: 20,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
               },
+            },
+          },
+          {
+            urlPattern: /ort.*\.(wasm|mjs)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'agrosight-onnx-runtime',
+              expiration: {
+                maxEntries: 6,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
         ],
