@@ -58,7 +58,8 @@ export default function Inspect() {
   const setYieldParams = useStore((s) => s.setYieldParams)
   const setDefectRateAutoFilled = useStore((s) => s.setDefectRateAutoFilled)
 
-  const [mode, setMode] = useState<InspectMode>('leaf')
+  const [mode, setMode] = useState<InspectMode>('produce')
+  const [produceLoading, setProduceLoading] = useState(true)
   const [phase, setPhase] = useState<InspectPhase>('live')
   const [modelLoading, setModelLoading] = useState(true)
   const [result, setResult] = useState<ClassificationResult | null>(null)
@@ -90,7 +91,10 @@ export default function Inspect() {
   }, [])
 
   useEffect(() => {
-    loadProduceModel().then(() => setProduceMock(isProduceUsingMock()))
+    setProduceLoading(true)
+    loadProduceModel(true)
+      .then(() => setProduceMock(isProduceUsingMock()))
+      .finally(() => setProduceLoading(false))
     const unsub = subscribeProduceState(() => setProduceMock(isProduceUsingMock()))
     return () => {
       unsub()
@@ -148,7 +152,11 @@ export default function Inspect() {
           setCvResult(asCv)
           setLocalGradeCard(card)
           setGradeCard(card)
-          setYieldParams({ defect_rate_pct: produce.defectRatePct })
+          setYieldParams({
+            defect_rate_pct: produce.defectRatePct,
+            raw_material_grade:
+              produce.grade === 'A' ? 5 : produce.grade === 'B' ? 3 : 1,
+          })
           setDefectRateAutoFilled(true)
           setPhase('result')
           addInspection({
@@ -170,7 +178,15 @@ export default function Inspect() {
           setCvResult(classification)
           setLocalGradeCard(card)
           setGradeCard(card)
-          setYieldParams({ defect_rate_pct: card.defectRatePct })
+          setYieldParams({
+            defect_rate_pct: card.defectRatePct,
+            raw_material_grade:
+              classification.class === 'HEALTHY'
+                ? 5
+                : classification.class === 'SURFACE_DEFECT'
+                  ? 3
+                  : 1,
+          })
           setDefectRateAutoFilled(true)
           setPhase('result')
           addInspection({
@@ -332,7 +348,14 @@ export default function Inspect() {
         </p>
       )}
 
-      {mode === 'produce' && (
+      {mode === 'produce' && produceLoading && (
+        <div className="mt-4 flex items-center gap-2 font-mono text-xs text-muted">
+          <Loader2 className="h-4 w-4 animate-spin text-cyan" aria-hidden />
+          Loading Produce TFLite (~90 MB) — wait for Live badge before testing…
+        </div>
+      )}
+
+      {mode === 'produce' && !produceLoading && (
         <p
           className={cn(
             'mt-4 font-mono text-xs uppercase tracking-widest',
@@ -340,9 +363,24 @@ export default function Inspect() {
           )}
         >
           {produceMock
-            ? '● Produce Quality · DEMO heuristic until Colab TFLite is dropped in'
-            : '● Produce Quality · live TFLite'}
+            ? '● Produce Quality · DEMO heuristic (TFLite missing or failed)'
+            : '● Produce Quality · live TFLite · expect Fresh / Borderline / Spoiled (not leaf blight)'}
         </p>
+      )}
+
+      {mode === 'produce' && produceMock && (
+        <button
+          type="button"
+          className="mt-2 rounded-lg border border-[var(--border-2)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-cyan"
+          onClick={() => {
+            setProduceLoading(true)
+            loadProduceModel(true)
+              .then(() => setProduceMock(isProduceUsingMock()))
+              .finally(() => setProduceLoading(false))
+          }}
+        >
+          Retry produce TFLite load
+        </button>
       )}
 
       {mode === 'leaf' && !modelLoading && isUsingMock() && (

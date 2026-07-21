@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { YIELD_PARAM_RANGES, type YieldParams } from '@/lib/constants'
+import { YIELD_PARAM_IMPACT } from '@/lib/yieldEngine'
 import {
   formatParamValue,
   getParamHealth,
@@ -23,6 +24,7 @@ export function ParamSlider({
   const meta = YIELD_PARAM_RANGES[paramKey]
   const health = getParamHealth(paramKey, value)
   const thumbColor = HEALTH_COLORS[health]
+  const impact = YIELD_PARAM_IMPACT[paramKey]
 
   return (
     <div
@@ -42,6 +44,18 @@ export function ParamSlider({
           {highlighted && (
             <span className="ml-2 text-cyan">· from inspection</span>
           )}
+          <span
+            className={cn(
+              'ml-2 font-mono text-[9px] uppercase tracking-wider',
+              impact === 'high'
+                ? 'text-healthy'
+                : impact === 'medium'
+                  ? 'text-warning'
+                  : 'text-dim',
+            )}
+          >
+            {impact} impact
+          </span>
         </label>
         <span
           className="font-mono text-sm font-semibold tabular-nums text-text"

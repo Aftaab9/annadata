@@ -79,6 +79,63 @@ export const DEFAULT_YIELD_PARAMS: YieldParams = {
   defect_rate_pct: 5,
 }
 
+/** Demo presets — same linear model, different operating points */
+export const YIELD_SCENARIOS: {
+  id: 'optimal' | 'baseline' | 'stressed'
+  label: string
+  blurb: string
+  params: YieldParams
+}[] = [
+  {
+    id: 'optimal',
+    label: 'Optimal line',
+    blurb: 'Dry stock · Grade 5 · low defects',
+    params: {
+      moisture_pct: 8,
+      batch_weight_kg: 50,
+      ambient_temp_celsius: 28,
+      processing_duration_min: 120,
+      machine_speed_rpm: 350,
+      raw_material_grade: 5,
+      defect_rate_pct: 2,
+    },
+  },
+  {
+    id: 'baseline',
+    label: 'Baseline',
+    blurb: 'Typical SME defaults (~83%)',
+    params: { ...DEFAULT_YIELD_PARAMS },
+  },
+  {
+    id: 'stressed',
+    label: 'Stressed line',
+    blurb: 'Wet · Grade 1 · high defects · overspeed',
+    params: {
+      moisture_pct: 23,
+      batch_weight_kg: 50,
+      ambient_temp_celsius: 40,
+      processing_duration_min: 30,
+      machine_speed_rpm: 1100,
+      raw_material_grade: 1,
+      defect_rate_pct: 25,
+    },
+  },
+]
+
+/** Map Produce Grade A/B/C → 1–5 material score for the yield model */
+export function produceGradeToMaterial(grade: 'A' | 'B' | 'C'): number {
+  if (grade === 'A') return 5
+  if (grade === 'B') return 3
+  return 1
+}
+
+/** Map leaf CV class → material score */
+export function leafClassToMaterial(cls: DefectClass): number {
+  if (cls === 'HEALTHY') return 5
+  if (cls === 'SURFACE_DEFECT') return 3
+  return 1
+}
+
 export const HERO_STATS = [
   { value: 97.4, suffix: '%', label: 'CV Accuracy' },
   { value: 6, suffix: '', label: 'Crop SKUs' },

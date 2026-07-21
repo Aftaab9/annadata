@@ -3,8 +3,8 @@ import * as tf from '@tensorflow/tfjs'
 const IMG_SIZE = 224
 
 /**
- * Keras export includes backbone preprocess_input inside the graph.
- * Feed float32 RGB 0–255, 224×224 — same as Colab test_ds input.
+ * Keras leaf PlantVillage export expects float32 RGB **0–255**, 224×224.
+ * Produce Quality uses `/255` inside produceInference.ts (Colab trained 0–1).
  */
 export function imageToInputTensor(
   source: HTMLImageElement | HTMLCanvasElement | ImageBitmap,

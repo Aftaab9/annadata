@@ -39,7 +39,7 @@ const COMPARISON_CHARTS = [
     src: '/assets/11_produce_model_comparison.png',
     title: 'Produce Quality — model comparison',
     blurb:
-      'After Colab: drop 11_produce_model_comparison.png here. Healthy vs Rotten CNN.',
+      'Healthy vs Rotten CNN — ResNet50 won hold-out (~97% acc). Separate from Leaf Health.',
   },
 ]
 
@@ -52,7 +52,7 @@ const OTHER_CHARTS = [
   {
     src: '/assets/12_produce_confusion_matrix.png',
     title: 'Produce Quality confusion matrix',
-    blurb: 'After Colab: FRESH / BORDERLINE / ROTTEN matrix for Grade A/B/C honesty.',
+    blurb: 'Hold-out matrix for Grade A/B/C honesty — off-diagonals still justify HITL.',
   },
   {
     src: '/assets/03_confusion_matrix.png',

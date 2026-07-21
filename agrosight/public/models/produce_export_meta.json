@@ -1,0 +1,7 @@
+{
+  "export": "binary_sigmoid_stripped_threeway",
+  "preprocess": "float32_rgb_div_255",
+  "output": "P(Rotten)",
+  "ops_kept": 75,
+  "sigmoid_index": 190
+}

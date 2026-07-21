@@ -1,4 +1,9 @@
 import type { CropRecInputs, CropRecResult } from './types'
+import {
+  CROP_REC_META,
+  CROP_REC_ONNX,
+  runClassifierOnnx,
+} from '@/lib/onnxRuntime'
 
 interface CropCentroid extends CropRecInputs {
   crop: string
@@ -64,8 +69,36 @@ function toConfidence(distances: number[]): number[] {
   return weights.map((w) => w / total)
 }
 
-/** KNN lookup on Kaggle Crop Recommendation centroids (Phase 3 — no browser training) */
+function titleCase(s: string) {
+  return s.replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+/** Prefer Colab RF ONNX; fall back to centroid lookup. */
 export async function recommendCrop(inputs: CropRecInputs): Promise<CropRecResult> {
+  const features = FEATURE_KEYS.map((k) => inputs[k])
+  const onnx = await runClassifierOnnx(CROP_REC_ONNX, CROP_REC_META, features)
+
+  if (onnx) {
+    const ranked = onnx.probabilities
+      .map((p, i) => ({ i, p }))
+      .sort((a, b) => b.p - a.p)
+    const top = ranked.slice(0, 4)
+    const bestName = onnx.className
+    const acc = onnx.meta.accuracy
+    return {
+      crop: bestName,
+      label: titleCase(bestName),
+      confidence: Math.round(onnx.confidence * 100) / 100,
+      source: 'model',
+      reason: `RandomForest ONNX (${acc != null ? `${acc}% hold-out` : 'Colab'}) — top class ${titleCase(bestName)}.`,
+      alternatives: top.slice(1).map((t) => ({
+        crop: onnx.meta.classes[t.i] ?? String(t.i),
+        label: titleCase(onnx.meta.classes[t.i] ?? String(t.i)),
+        confidence: Math.round(t.p * 100) / 100,
+      })),
+    }
+  }
+
   const centroids = await loadCentroids()
   const ranked = centroids
     .map((c) => ({ c, dist: distance(inputs, c) }))
@@ -80,7 +113,7 @@ export async function recommendCrop(inputs: CropRecInputs): Promise<CropRecResul
     label: best.c.label,
     confidence: Math.round((confidences[0] ?? 0.5) * 100) / 100,
     source: 'model',
-    reason: best.c.reason,
+    reason: `${best.c.reason} (centroid lookup — ONNX unavailable)`,
     alternatives: top.slice(1).map((t, i) => ({
       crop: t.c.crop,
       label: t.c.label,

@@ -22,6 +22,15 @@ export interface InspectionRecord {
   thumbnail?: string
 }
 
+export interface YieldScenarioPoint {
+  id: string
+  timestamp: number
+  yield_pct: number
+  efficiency_score: number
+  throughput_kg_per_hr: number
+  label?: string
+}
+
 interface AppState {
   language: Language
   setLanguage: (lang: Language) => void
@@ -63,6 +72,10 @@ interface AppState {
 
   yieldPrediction: YieldPrediction | null
   setYieldPrediction: (p: YieldPrediction | null) => void
+
+  yieldScenarioHistory: YieldScenarioPoint[]
+  pushYieldScenario: (point: YieldScenarioPoint) => void
+  clearYieldScenarios: () => void
 
   gradeCard: GradeCardData | null
   setGradeCard: (card: GradeCardData | null) => void
@@ -122,6 +135,24 @@ export const useStore = create<AppState>()(
       yieldPrediction: null,
       setYieldPrediction: (yieldPrediction) => set({ yieldPrediction }),
 
+      yieldScenarioHistory: [],
+      pushYieldScenario: (point) =>
+        set((s) => {
+          const last = s.yieldScenarioHistory[0]
+          // Dedupe near-identical consecutive points (slider debounce)
+          if (
+            last &&
+            Math.abs(last.yield_pct - point.yield_pct) < 0.05 &&
+            Math.abs(last.throughput_kg_per_hr - point.throughput_kg_per_hr) < 0.05
+          ) {
+            return s
+          }
+          return {
+            yieldScenarioHistory: [point, ...s.yieldScenarioHistory].slice(0, 40),
+          }
+        }),
+      clearYieldScenarios: () => set({ yieldScenarioHistory: [] }),
+
       gradeCard: null,
       setGradeCard: (gradeCard) => set({ gradeCard }),
     }),
@@ -130,6 +161,7 @@ export const useStore = create<AppState>()(
       partialize: (s) => ({
         language: s.language,
         inspectionHistory: s.inspectionHistory,
+        yieldScenarioHistory: s.yieldScenarioHistory,
         location: s.location,
       }),
     },

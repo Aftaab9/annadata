@@ -47,7 +47,13 @@ function ChartTooltip({
 }
 
 export function SessionAnalytics() {
-  const { inspectionHistory, clearHistory, yieldPrediction } = useStore()
+  const {
+    inspectionHistory,
+    clearHistory,
+    yieldPrediction,
+    yieldScenarioHistory,
+    clearYieldScenarios,
+  } = useStore()
 
   const summary = useMemo(
     () => summarizeSession(inspectionHistory),
@@ -61,8 +67,32 @@ export function SessionAnalytics() {
     () => buildClassDistribution(inspectionHistory),
     [inspectionHistory],
   )
+  const yieldSeries = useMemo(
+    () =>
+      [...yieldScenarioHistory]
+        .reverse()
+        .map((p, i) => ({
+          index: i + 1,
+          yield: p.yield_pct,
+          efficiency: p.efficiency_score,
+          throughput: p.throughput_kg_per_hr,
+          label: p.label,
+        })),
+    [yieldScenarioHistory],
+  )
 
   const empty = inspectionHistory.length === 0
+  const hasYield = yieldSeries.length > 0
+  const avgEfficiency = useMemo(() => {
+    if (!yieldSeries.length) return 0
+    const sum = yieldSeries.reduce((a, r) => a + r.efficiency, 0)
+    return Math.round((sum / yieldSeries.length) * 10) / 10
+  }, [yieldSeries])
+  const avgThroughput = useMemo(() => {
+    if (!yieldSeries.length) return 0
+    const sum = yieldSeries.reduce((a, r) => a + r.throughput, 0)
+    return Math.round((sum / yieldSeries.length) * 10) / 10
+  }, [yieldSeries])
 
   return (
     <section className="relative mt-12 overflow-hidden rounded-2xl border border-cyan/20 bg-gradient-to-br from-cyan/5 via-transparent to-indigo/5 p-6">
@@ -104,8 +134,11 @@ export function SessionAnalytics() {
           </button>
           <button
             type="button"
-            disabled={empty}
-            onClick={() => clearHistory()}
+            disabled={empty && !hasYield}
+            onClick={() => {
+              clearHistory()
+              clearYieldScenarios()
+            }}
             className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] px-4 py-2 text-sm text-muted transition hover:border-danger/40 hover:text-danger disabled:opacity-40"
           >
             <Trash2 className="h-4 w-4" aria-hidden />
@@ -292,6 +325,133 @@ export function SessionAnalytics() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Yield / process efficiency — independent of inspect history */}
+      <div className="relative mt-8">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <p className="section-label">Process efficiency</p>
+            <h3 className="mt-1 text-lg font-semibold text-text">
+              Yield & throughput trends
+            </h3>
+            <p className="mt-1 max-w-xl text-sm text-muted">
+              Scenarios from the{' '}
+              <Link to="/yield" className="text-cyan hover:underline">
+                Yield Optimizer
+              </Link>{' '}
+              — defect rate, yield %, and kg/h for the SME processing line.
+            </p>
+          </div>
+        </div>
+
+        {!hasYield ? (
+          <Card className="mt-4 py-8 text-center">
+            <p className="text-sm text-muted">
+              No yield scenarios yet — open the optimizer and try Optimal vs
+              Stressed.
+            </p>
+            <Link
+              to="/yield"
+              className="mt-4 inline-flex rounded-[var(--radius)] bg-accent px-5 py-2.5 text-sm font-semibold text-[oklch(0.12_0.02_145)] no-underline"
+            >
+              Open Yield Optimizer →
+            </Link>
+          </Card>
+        ) : (
+          <div className="mt-4 space-y-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {[
+                {
+                  label: 'Scenarios',
+                  value: yieldSeries.length,
+                  suffix: '',
+                },
+                {
+                  label: 'Last yield',
+                  value: yieldPrediction?.yield_pct ?? yieldSeries[yieldSeries.length - 1]!.yield,
+                  suffix: '%',
+                },
+                { label: 'Avg efficiency', value: avgEfficiency, suffix: '' },
+                {
+                  label: 'Avg throughput',
+                  value: avgThroughput,
+                  suffix: ' kg/h',
+                },
+              ].map((k) => (
+                <Card key={k.label} className="text-center">
+                  <p className="font-mono text-xl font-semibold text-text">
+                    <Counter
+                      value={k.value}
+                      suffix={k.suffix}
+                      decimals={k.suffix === '%' || k.suffix === ' kg/h' ? 1 : 0}
+                    />
+                  </p>
+                  <p className="mt-1 font-mono text-[9px] uppercase tracking-widest text-muted">
+                    {k.label}
+                  </p>
+                </Card>
+              ))}
+            </div>
+            <Card>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted">
+                Yield % over scenarios
+              </p>
+              <div className="mt-4 h-52">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={yieldSeries}>
+                    <defs>
+                      <linearGradient id="yieldGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
+                        <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis
+                      dataKey="index"
+                      tick={{ fill: 'rgba(236,237,245,0.35)', fontSize: 10 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      domain={[40, 100]}
+                      tick={{ fill: 'rgba(236,237,245,0.35)', fontSize: 10 }}
+                      axisLine={false}
+                      tickLine={false}
+                      unit="%"
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: '#0a0c16',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: 8,
+                        fontSize: 12,
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="yield"
+                      stroke="#10b981"
+                      strokeWidth={2}
+                      fill="url(#yieldGrad)"
+                      dot={{ fill: '#10b981', r: 3 }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="efficiency"
+                      stroke="#06b6d4"
+                      strokeWidth={1.5}
+                      fill="transparent"
+                      dot={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <p className="mt-2 font-mono text-[10px] text-dim">
+                Green = yield % · Cyan outline = process efficiency score
+              </p>
+            </Card>
+          </div>
+        )}
+      </div>
     </section>
   )
 }

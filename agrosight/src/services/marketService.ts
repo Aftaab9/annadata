@@ -32,6 +32,11 @@ export function getMarketBackend(): MarketBackend {
   return getSupabaseEnv().configured ? 'supabase' : 'localStorage'
 }
 
+function gradePrice(modal: number, grade: MarketGrade): number {
+  const m = grade === 'A' ? 1.1 : grade === 'C' ? 0.8 : 1
+  return Math.round(modal * m)
+}
+
 function rowToListing(row: ListingRow): MarketListing {
   return {
     id: row.id,
@@ -50,6 +55,34 @@ function rowToListing(row: ListingRow): MarketListing {
   }
 }
 
+function listingToInsert(l: MarketListing) {
+  return {
+    id: l.id,
+    farmer_name: l.farmer_name,
+    crop: l.crop,
+    grade: l.grade,
+    quantity_quintals: l.quantity_quintals,
+    district: l.district,
+    state: l.state,
+    price_per_quintal: l.price_per_quintal,
+    mandi_modal: l.mandi_modal ?? null,
+    grade_card_id: l.grade_card_id ?? null,
+    grade_card_json: l.grade_card_id
+      ? {
+          id: l.grade_card_id,
+          grade: l.grade,
+          crop: l.crop,
+          sourceMode: 'produce',
+          demo: true,
+        }
+      : null,
+    contact: l.contact ?? null,
+    interests: l.interests ?? 0,
+    farmer_id: 'seed-demo',
+    created_at: new Date(l.created_at).toISOString(),
+  }
+}
+
 function readAll(): MarketListing[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -63,85 +96,236 @@ function writeAll(listings: MarketListing[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(listings))
 }
 
-const SEED: MarketListing[] = [
+/**
+ * Demo marketplace inventory — prices anchored to Jul 2026 Agmarknet
+ * Maharashtra modals (Tomato~1733, Maize~2182, Potato~1433, Onion~1963,
+ * Soyabean~7167; Apple~15893). Fair price = modal × (A +10% / B / C −20%).
+ * Fixed UUIDs so Supabase upsert is idempotent.
+ */
+export const MARKET_SEED: MarketListing[] = [
   {
-    id: 'seed-1',
+    id: 'a0000001-0000-4000-8000-000000000001',
     farmer_name: 'Ramesh Patil',
     crop: 'Tomato',
     grade: 'A',
-    quantity_quintals: 40,
+    quantity_quintals: 85,
     district: 'Nashik',
     state: 'Maharashtra',
-    price_per_quintal: 2145,
-    mandi_modal: 1950,
+    mandi_modal: 1733,
+    price_per_quintal: gradePrice(1733, 'A'),
     grade_card_id: 'gc-demo-tomato-a',
     contact: 'ramesh@annadata.demo',
-    interests: 3,
+    interests: 4,
     created_at: Date.now() - 86400000,
   },
   {
-    id: 'seed-2',
+    id: 'a0000001-0000-4000-8000-000000000002',
     farmer_name: 'Sunita Devi',
     crop: 'Maize',
     grade: 'B',
-    quantity_quintals: 120,
+    quantity_quintals: 140,
     district: 'Pune',
     state: 'Maharashtra',
-    price_per_quintal: 1950,
-    mandi_modal: 1950,
+    mandi_modal: 2182,
+    price_per_quintal: gradePrice(2182, 'B'),
     grade_card_id: 'gc-demo-maize-b',
     contact: 'sunita@annadata.demo',
-    interests: 1,
+    interests: 2,
     created_at: Date.now() - 172800000,
   },
   {
-    id: 'seed-3',
+    id: 'a0000001-0000-4000-8000-000000000003',
     farmer_name: 'FPC Solapur Collective',
     crop: 'Onion',
     grade: 'A',
-    quantity_quintals: 280,
+    quantity_quintals: 220,
     district: 'Solapur',
     state: 'Maharashtra',
-    price_per_quintal: 2090,
-    mandi_modal: 1900,
+    mandi_modal: 1963,
+    price_per_quintal: gradePrice(1963, 'A'),
     grade_card_id: 'gc-demo-onion-a',
     contact: 'fpc@annadata.demo',
-    interests: 5,
+    interests: 6,
     created_at: Date.now() - 43200000,
   },
   {
-    id: 'seed-4',
+    id: 'a0000001-0000-4000-8000-000000000004',
     farmer_name: 'Kiran Jadhav',
     crop: 'Potato',
     grade: 'C',
-    quantity_quintals: 60,
+    quantity_quintals: 70,
     district: 'Pune',
     state: 'Maharashtra',
-    price_per_quintal: 920,
-    mandi_modal: 1150,
+    mandi_modal: 1433,
+    price_per_quintal: gradePrice(1433, 'C'),
     contact: 'kiran@annadata.demo',
-    interests: 0,
+    interests: 1,
     created_at: Date.now() - 259200000,
   },
   {
-    id: 'seed-5',
+    id: 'a0000001-0000-4000-8000-000000000005',
     farmer_name: 'Lakshmi Farms',
     crop: 'Tomato',
     grade: 'B',
-    quantity_quintals: 90,
+    quantity_quintals: 95,
     district: 'Bengaluru',
     state: 'Karnataka',
-    price_per_quintal: 2050,
-    mandi_modal: 2050,
+    mandi_modal: 1733,
+    price_per_quintal: gradePrice(1733, 'B'),
     grade_card_id: 'gc-demo-tomato-b',
     contact: 'lakshmi@annadata.demo',
-    interests: 2,
+    interests: 3,
     created_at: Date.now() - 7200000,
+  },
+  {
+    id: 'a0000001-0000-4000-8000-000000000006',
+    farmer_name: 'Anjali More',
+    crop: 'Tomato',
+    grade: 'A',
+    quantity_quintals: 120,
+    district: 'Ahmednagar',
+    state: 'Maharashtra',
+    mandi_modal: 1733,
+    price_per_quintal: gradePrice(1733, 'A'),
+    grade_card_id: 'gc-demo-tomato-a2',
+    contact: 'anjali@annadata.demo',
+    interests: 5,
+    created_at: Date.now() - 3600000,
+  },
+  {
+    id: 'a0000001-0000-4000-8000-000000000007',
+    farmer_name: 'Green Valley FPC',
+    crop: 'Tomato',
+    grade: 'A',
+    quantity_quintals: 180,
+    district: 'Nashik',
+    state: 'Maharashtra',
+    mandi_modal: 1733,
+    price_per_quintal: gradePrice(1733, 'A'),
+    grade_card_id: 'gc-demo-tomato-a3',
+    contact: 'greenvalley@annadata.demo',
+    interests: 8,
+    created_at: Date.now() - 1800000,
+  },
+  {
+    id: 'a0000001-0000-4000-8000-000000000008',
+    farmer_name: 'Vikram Singh',
+    crop: 'Apple',
+    grade: 'A',
+    quantity_quintals: 35,
+    district: 'Nashik',
+    state: 'Maharashtra',
+    mandi_modal: 15893,
+    price_per_quintal: gradePrice(15893, 'A'),
+    grade_card_id: 'gc-demo-apple-a',
+    contact: 'vikram@annadata.demo',
+    interests: 7,
+    created_at: Date.now() - 5400000,
+  },
+  {
+    id: 'a0000001-0000-4000-8000-000000000009',
+    farmer_name: 'Meena Cooperative',
+    crop: 'Soybean',
+    grade: 'B',
+    quantity_quintals: 200,
+    district: 'Latur',
+    state: 'Maharashtra',
+    mandi_modal: 7167,
+    price_per_quintal: gradePrice(7167, 'B'),
+    grade_card_id: 'gc-demo-soy-b',
+    contact: 'meena@annadata.demo',
+    interests: 2,
+    created_at: Date.now() - 9600000,
+  },
+  {
+    id: 'a0000001-0000-4000-8000-00000000000a',
+    farmer_name: 'Prakash Kale',
+    crop: 'Pepper',
+    grade: 'A',
+    quantity_quintals: 28,
+    district: 'Kolhapur',
+    state: 'Maharashtra',
+    mandi_modal: 4200,
+    price_per_quintal: gradePrice(4200, 'A'),
+    grade_card_id: 'gc-demo-pepper-a',
+    contact: 'prakash@annadata.demo',
+    interests: 3,
+    created_at: Date.now() - 12000000,
+  },
+  {
+    id: 'a0000001-0000-4000-8000-00000000000b',
+    farmer_name: 'Sai Potato Growers',
+    crop: 'Potato',
+    grade: 'B',
+    quantity_quintals: 110,
+    district: 'Satara',
+    state: 'Maharashtra',
+    mandi_modal: 1433,
+    price_per_quintal: gradePrice(1433, 'B'),
+    grade_card_id: 'gc-demo-potato-b',
+    contact: 'sai@annadata.demo',
+    interests: 1,
+    created_at: Date.now() - 20000000,
+  },
+  {
+    id: 'a0000001-0000-4000-8000-00000000000c',
+    farmer_name: 'Nashik Tomato Hub',
+    crop: 'Tomato',
+    grade: 'A',
+    quantity_quintals: 150,
+    district: 'Nashik',
+    state: 'Maharashtra',
+    mandi_modal: 1733,
+    price_per_quintal: gradePrice(1733, 'A'),
+    grade_card_id: 'gc-demo-tomato-a4',
+    contact: 'hub@annadata.demo',
+    interests: 9,
+    created_at: Date.now() - 900000,
   },
 ]
 
 function ensureSeed(): void {
-  if (readAll().length === 0) writeAll(SEED)
+  const existing = readAll()
+  if (existing.length === 0) {
+    writeAll(MARKET_SEED)
+    return
+  }
+  // Upgrade older tiny seeds so Buyer never looks empty after refresh
+  if (existing.length < 6 && existing.every((l) => l.id.startsWith('seed-'))) {
+    writeAll(MARKET_SEED)
+  }
+}
+
+/** Upsert demo rows when Supabase table is empty (idempotent fixed UUIDs). */
+async function ensureSupabaseSeed(
+  sb: NonNullable<ReturnType<typeof getSupabase>>,
+): Promise<MarketListing[]> {
+  const { count, error: countErr } = await sb
+    .from('listings')
+    .select('id', { count: 'exact', head: true })
+
+  if (countErr) throw countErr
+  if ((count ?? 0) > 0) {
+    const { data, error } = await sb
+      .from('listings')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return (data as ListingRow[] | null)?.map(rowToListing) ?? []
+  }
+
+  const payload = MARKET_SEED.map(listingToInsert)
+  const { error: upsertErr } = await sb.from('listings').upsert(payload, {
+    onConflict: 'id',
+  })
+  if (upsertErr) throw upsertErr
+
+  const { data, error } = await sb
+    .from('listings')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data as ListingRow[] | null)?.map(rowToListing) ?? MARKET_SEED
 }
 
 /** Sync local-only list (fallback / offline). Prefer listMarketingsAsync. */
@@ -161,16 +345,10 @@ export async function listMarketingsAsync(): Promise<{
   }
 
   try {
-    const { data, error } = await sb
-      .from('listings')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (error) throw error
-    const listings = (data as ListingRow[] | null)?.map(rowToListing) ?? []
+    const listings = await ensureSupabaseSeed(sb)
     return { listings, backend: 'supabase' }
   } catch (e) {
-    console.warn('[market] Supabase list failed → localStorage', e)
+    console.warn('[market] Supabase list/seed failed → localStorage', e)
     return {
       listings: listMarketings(),
       backend: 'localStorage',
@@ -302,6 +480,7 @@ export async function expressInterestAsync(
   }
 
   const sb = getSupabase()
+  // Local-only ids (legacy seed- / m-) stay in localStorage
   if (!sb || listingId.startsWith('seed-') || listingId.startsWith('m-')) {
     return { listing: expressInterest(listingId), backend: 'localStorage' }
   }

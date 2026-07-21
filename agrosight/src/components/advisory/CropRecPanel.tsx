@@ -5,6 +5,8 @@ import { useStore } from '@/store/useStore'
 import { recommendCrop, type CropRecResult } from '@/services'
 import type { CropRecInputs } from '@/services/types'
 import { cropIcon } from '@/lib/cropIcons'
+import { probeOnnxArtifacts } from '@/lib/onnxProbe'
+import { cn } from '@/lib/cn'
 
 const FIELD_META: {
   key: keyof CropRecInputs
@@ -28,6 +30,11 @@ export function CropRecPanel() {
   const setCropRecInputs = useStore((s) => s.setCropRecInputs)
   const [result, setResult] = useState<CropRecResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [onnxReady, setOnnxReady] = useState(false)
+
+  useEffect(() => {
+    probeOnnxArtifacts().then((s) => setOnnxReady(s.cropRec))
+  }, [])
 
   useEffect(() => {
     setLoading(true)
@@ -42,15 +49,25 @@ export function CropRecPanel() {
   return (
     <div className="space-y-4">
       <Card>
-        <p className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-warning">
-          Lookup mode · drop crop_rec.onnx from Colab for trained RF
+        <p
+          className={cn(
+            'rounded-lg border px-3 py-2 font-mono text-[10px] uppercase tracking-widest',
+            onnxReady
+              ? 'border-healthy/30 bg-healthy/10 text-healthy'
+              : 'border-warning/30 bg-warning/10 text-warning',
+          )}
+        >
+          {onnxReady
+            ? 'Live · crop_rec.onnx RandomForest (99.3% hold-out)'
+            : 'Lookup mode · drop crop_rec.onnx from Colab for trained RF'}
         </p>
         <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-cyan">
           Crop recommendation
         </p>
         <p className="mt-1 text-sm text-muted">
-          Soil + climate → nearest crop from Kaggle centroids (honest lookup until
-          ONNX is in public/models/).
+          {onnxReady
+            ? 'Soil + climate → Colab RandomForest ONNX (22 crops).'
+            : 'Soil + climate → nearest crop from Kaggle centroids (lookup until ONNX loads).'}
         </p>
         <div className="mt-5 space-y-4">
           {FIELD_META.map(({ key, label, unit, step, min, max }) => (

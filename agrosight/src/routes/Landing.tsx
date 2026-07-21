@@ -176,6 +176,38 @@ export default function Landing() {
           </Link>
         </div>
 
+        {/* Real field / mandi photography */}
+        <div className="section-item mt-12 sm:mt-16">
+          <p className="section-label mb-3">On the ground</p>
+          <h3 className="font-display text-xl font-bold text-text sm:text-2xl">
+            Built for farms and mandis
+          </h3>
+          <p className="mt-2 max-w-lg text-sm text-muted">
+            From the field to the yard — grade produce, check prices, sell with a
+            Grade Card.
+          </p>
+          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+            {[
+              { src: '/photos/Farming.jpg', alt: 'Farm field' },
+              { src: '/photos/women-farmers.jpg', alt: 'Women farmers' },
+              { src: '/photos/vegetable-mandi.jpg', alt: 'Vegetable mandi' },
+              { src: '/photos/Vegetable-Shopping.jpg', alt: 'Fresh produce' },
+            ].map((ph) => (
+              <div
+                key={ph.src}
+                className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius)] border border-[var(--border)] sm:aspect-[3/4]"
+              >
+                <img
+                  src={ph.src}
+                  alt={ph.alt}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
         <PipelineFlow />
 
         <div className="section-item mt-12 sm:mt-16">

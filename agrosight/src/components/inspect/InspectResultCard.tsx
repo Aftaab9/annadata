@@ -18,6 +18,8 @@ import {
   DEFECT_TO_RATE,
   HITL_LOW_CONFIDENCE_MSG,
   HITL_THRESHOLD,
+  leafClassToMaterial,
+  produceGradeToMaterial,
   type DefectClass,
 } from '@/lib/constants'
 import type { GradeCardData } from '@/lib/gradeCard'
@@ -121,9 +123,26 @@ export function InspectResultCard({
       defect_rate_pct: isProduce
         ? gradeCard.defectRatePct
         : DEFECT_TO_RATE[result.class],
+      raw_material_grade: isProduce
+        ? produceGradeToMaterial(gradeCard.grade)
+        : leafClassToMaterial(result.class),
     })
     setDefectRateAutoFilled(true)
     navigate(isProduce ? '/prices' : '/yield')
+  }
+
+  const goToYield = () => {
+    setCvResult(result)
+    setYieldParams({
+      defect_rate_pct: isProduce
+        ? gradeCard.defectRatePct
+        : DEFECT_TO_RATE[result.class],
+      raw_material_grade: isProduce
+        ? produceGradeToMaterial(gradeCard.grade)
+        : leafClassToMaterial(result.class),
+    })
+    setDefectRateAutoFilled(true)
+    navigate('/yield')
   }
 
   const goToPrices = () => {
@@ -208,7 +227,7 @@ export function InspectResultCard({
           ) : (
             <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-healthy">
               {isProduce
-                ? '● Produce Quality TFLite · on-device'
+                ? '● Produce Quality TFLite · binary P(Rotten) · on-device'
                 : '● PlantVillage TFLite · on-device'}
             </p>
           )}
@@ -360,6 +379,16 @@ export function InspectResultCard({
               {isProduce ? 'Fair price for this grade' : 'Yield simulator'}
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
+            {isProduce && (
+              <Button
+                variant="outline"
+                className="w-full sm:col-span-2"
+                onClick={goToYield}
+              >
+                Yield optimizer (quality → throughput)
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Button>
+            )}
             <Button
               className="w-full sm:col-span-2"
               variant={lowConfidence || !isProduce ? 'outline' : 'primary'}

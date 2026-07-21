@@ -20,7 +20,7 @@ Thumbs.db
 .vscode/
 *.swp
 
-# Models & large binaries (keep README + deploy leaf model)
+# Models & large binaries (keep README + deploy leaf model + small advisory ONNX)
 *.tflite
 *.onnx
 *.h5
@@ -28,6 +28,9 @@ Thumbs.db
 *.pkl
 !**/models/README.md
 !agrosight/public/models/agrosight_plantvillage.tflite
+!agrosight/public/models/crop_rec.onnx
+!agrosight/public/models/fertilizer.onnx
+# produce TFLite (~90MB) stays local / deploy separately — over GitHub comfort size
 
 # Python / Colab junk
 __pycache__/

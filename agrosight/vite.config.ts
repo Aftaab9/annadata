@@ -92,6 +92,9 @@ export default defineConfig(({ mode }) => {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  optimizeDeps: {
+    exclude: ['onnxruntime-web'],
+  },
   base: '/',
   server: {
     port: 5173,

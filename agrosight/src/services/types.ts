@@ -58,9 +58,13 @@ export interface CropRecResult {
 
 export interface FertilizerInputs {
   crop: string
+  soil: string
   N: number
   P: number
   K: number
+  temperature: number
+  humidity: number
+  moisture: number
 }
 
 export interface FertilizerResult {

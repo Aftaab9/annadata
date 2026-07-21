@@ -1,164 +1,385 @@
+import { Link } from 'react-router-dom'
+import {
+  ArrowRight,
+  Eye,
+  Landmark,
+  Scale,
+  Shield,
+  Smartphone,
+  Sparkles,
+  Users,
+} from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { SectionLabel } from '@/components/ui/SectionLabel'
+import { Counter } from '@/components/ui/Counter'
 import { HITL_THRESHOLD } from '@/lib/constants'
-import { HitlDiagram, NoisyBlob, RevealOnScroll, SplitText } from '@/components/fx'
+import { HitlDiagram, RevealOnScroll, SplitText } from '@/components/fx'
+import { cn } from '@/lib/cn'
 
 const PRINCIPLES = [
-  { title: 'Transparency', body: 'Every prediction shows confidence and per-class probabilities.' },
-  { title: 'Sovereignty', body: 'Inference runs on-device. Worker data stays with the worker.' },
-  { title: 'Skill elevation', body: 'AI handles repetitive scanning; workers validate quality.' },
+  {
+    title: 'Transparency',
+    body: 'Every prediction shows confidence and per-class probabilities — no silent automation.',
+    icon: Eye,
+  },
+  {
+    title: 'Sovereignty',
+    body: 'Inference runs on-device. Worker photos and decisions stay with the worker.',
+    icon: Smartphone,
+  },
+  {
+    title: 'Skill elevation',
+    body: 'AI handles repetitive scanning; people move to validation, negotiation, and sales.',
+    icon: Sparkles,
+  },
 ]
 
 const COST_ROWS = [
-  { item: 'Monthly deployment', value: '₹2,500' },
-  { item: 'Savings per batch (defect reduction)', value: '₹1,000' },
-  { item: 'Payback', value: '3 batches' },
-  { item: 'Defect rate improvement', value: '8% → 3%' },
+  { item: 'Monthly deployment', value: '₹2,500', note: 'phone + hosting' },
+  { item: 'Savings per cleaned batch', value: '₹1,000', note: 'fewer rejects' },
+  { item: 'Payback', value: '3 batches', note: 'not years' },
+  { item: 'Defect rate on line', value: '8% → 3%', note: 'target improvement' },
+]
+
+const SKILL_LADDER = [
+  {
+    title: 'Before',
+    tone: 'muted' as const,
+    points: [
+      '100% manual sorting — slow, inconsistent',
+      'Price set by middlemen with opaque grades',
+      'Skill = speed of hand-picking only',
+    ],
+  },
+  {
+    title: 'With Annadata',
+    tone: 'accent' as const,
+    points: [
+      'AI drafts grade; supervisor owns exceptions',
+      'Fair price = mandi modal ± Grade A/B/C',
+      'Skill = review, advisory, marketplace listing',
+    ],
+  },
+]
+
+const SDGS = [
+  {
+    code: '02',
+    title: 'Zero Hunger',
+    body: 'Cut post-harvest loss with early leaf disease and produce grading.',
+  },
+  {
+    code: '08',
+    title: 'Decent Work',
+    body: 'Elevate rural roles — tools for workers, not a headcount cut.',
+  },
+  {
+    code: '12',
+    title: 'Responsible consumption',
+    body: 'Transparent Grade Cards so buyers trust what they purchase.',
+  },
 ]
 
 export default function Ethics() {
+  const gatePct = HITL_THRESHOLD * 100
+  // Illustrative math from the master brief: 8%→3% on 50kg @ ₹400/kg
+  const wasteBefore = Math.round(50 * 0.08 * 400)
+  const wasteAfter = Math.round(50 * 0.03 * 400)
+  const saved = wasteBefore - wasteAfter
+
   return (
     <div className="relative mx-auto max-w-3xl px-4 py-8 pb-28">
-      <NoisyBlob size={280} className="right-0 top-0 opacity-40" />
-      <SectionLabel>Human-in-the-Loop</SectionLabel>
+      {/* Photo thesis band */}
+      <div className="relative mb-8 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)]">
+        <img
+          src="/photos/women-farmers.jpg"
+          alt="Rural women farmers"
+          className="h-48 w-full object-cover sm:h-56"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/55 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+          <SectionLabel>Human-in-the-Loop</SectionLabel>
+          <SplitText
+            as="h1"
+            className="font-display mt-2 max-w-xl text-3xl font-bold tracking-tight text-text sm:text-4xl"
+          >
+            Built to assist rural workers, not replace them.
+          </SplitText>
+        </div>
+      </div>
 
-      <SplitText
-        as="h1"
-        className="gradient-text relative z-10 text-3xl font-bold tracking-tight md:text-4xl"
-      >
-        Built to assist rural workers, not replace them.
-      </SplitText>
+      <p className="max-w-xl text-sm leading-relaxed text-muted sm:text-[15px]">
+        Automation in food processing can displace sorting jobs — that risk is
+        real. Annadata keeps people on the decision path: AI drafts, humans
+        confirm, and low confidence always stops the line.
+      </p>
 
-      <RevealOnScroll immediate className="mt-10">
+      <RevealOnScroll immediate className="mt-8">
         <HitlDiagram />
       </RevealOnScroll>
 
-      <RevealOnScroll immediate delay={0.05}>
-        <Card className="mt-8">
-          <h2 className="font-semibold text-text">HITL confidence gate</h2>
-          <p className="mt-3 leading-relaxed text-muted">
-            When AI confidence falls below{' '}
-            <span className="font-mono text-cyan">{HITL_THRESHOLD * 100}%</span>,
-            the system requires human supervisor review before any batch decision.
-          </p>
-        </Card>
+      <RevealOnScroll immediate delay={0.05} className="mt-8">
+        <div className="rounded-[var(--radius-lg)] border border-warning/25 bg-warning/5 p-5 sm:p-6">
+          <div className="flex items-start gap-3">
+            <Shield className="mt-0.5 h-6 w-6 shrink-0 text-warning" aria-hidden />
+            <div>
+              <h2 className="font-display text-lg font-semibold text-text">
+                HITL confidence gate
+              </h2>
+              <p className="mt-2 leading-relaxed text-muted">
+                When AI confidence falls below{' '}
+                <span className="font-mono text-warning">{gatePct}%</span>,
+                marketplace listing and reject/accept stay blocked until a
+                supervisor inspects the batch. Drag the slider above to see the
+                path switch live — the same gate used on Inspect.
+              </p>
+              <Link
+                to="/inspect"
+                className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-cyan no-underline hover:underline"
+              >
+                Try it on Inspect <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
       </RevealOnScroll>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        {PRINCIPLES.map(({ title, body }, i) => (
+      <div className="mt-8 grid gap-3 sm:grid-cols-3">
+        {PRINCIPLES.map(({ title, body, icon: Icon }, i) => (
           <RevealOnScroll key={title} immediate delay={i * 0.05}>
-            <Card className="h-full">
-              <h3 className="font-semibold text-cyan">{title}</h3>
-              <p className="mt-2 text-sm text-muted">{body}</p>
-            </Card>
+            <div className="h-full rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4">
+              <Icon className="h-5 w-5 text-cyan" aria-hidden />
+              <h3 className="mt-3 font-semibold text-text">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{body}</p>
+            </div>
           </RevealOnScroll>
         ))}
       </div>
 
-      <RevealOnScroll immediate delay={0.1} className="mt-8">
-        <Card>
-          <h2 className="font-semibold text-text">Cost-benefit</h2>
-          <div className="mt-4 divide-y divide-[var(--border)]">
-            {COST_ROWS.map((row) => (
-              <div
-                key={row.item}
-                className="flex justify-between py-3 text-sm first:pt-0 last:pb-0"
-              >
-                <span className="text-muted">{row.item}</span>
-                <span className="font-mono text-text">{row.value}</span>
+      {/* Employment before / after — uses photos */}
+      <RevealOnScroll immediate delay={0.08} className="mt-10">
+        <p className="section-label mb-3">Rural employment</p>
+        <h2 className="font-display text-xl font-bold text-text sm:text-2xl">
+          Skill displacement → skill elevation
+        </h2>
+        <p className="mt-2 max-w-xl text-sm text-muted">
+          The honest fear: cameras replace sorters. Our design answer: fewer
+          wasted batches, same people — now validating exceptions and selling
+          with a Grade Card.
+        </p>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {SKILL_LADDER.map((col) => (
+            <div
+              key={col.title}
+              className={cn(
+                'overflow-hidden rounded-[var(--radius)] border',
+                col.tone === 'accent'
+                  ? 'border-cyan/35 bg-cyan/5'
+                  : 'border-[var(--border)] bg-[var(--surface)]',
+              )}
+            >
+              <div className="relative h-36 overflow-hidden">
+                <img
+                  src={
+                    col.tone === 'accent'
+                      ? '/photos/Vegetable-Shopping.jpg'
+                      : '/photos/Farming.jpg'
+                  }
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)]/90 to-transparent" />
+                <p className="absolute bottom-3 left-3 font-mono text-[10px] uppercase tracking-widest text-cyan">
+                  {col.title}
+                </p>
               </div>
-            ))}
-          </div>
-        </Card>
-      </RevealOnScroll>
-
-      <RevealOnScroll immediate delay={0.12}>
-        <Card className="mt-8 border-warning/20">
-          <h2 className="font-semibold text-text">Bias acknowledgment</h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted">
-            <strong className="text-text">Leaf ≠ fruit.</strong> PlantVillage uses
-            lab-captured leaf imagery for disease risk while the crop grows. Market
-            Grade A/B/C comes only from the separate{' '}
-            <strong className="text-text">Produce Quality</strong> model on harvested
-            produce. Field photos still differ from lab data — the HITL gate (&lt;70%
-            confidence) exists because the model will be uncertain on unfamiliar inputs.
-          </p>
-        </Card>
-      </RevealOnScroll>
-
-      <RevealOnScroll immediate delay={0.14} className="mt-8">
-        <Card>
-          <h2 className="font-semibold text-text">What AI does / What humans do</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-cyan">
-                AI
-              </p>
-              <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-muted">
-                <li>
-                  <strong className="text-text">Leaf Health</strong> (PlantVillage) —
-                  disease on leaves while growing
-                </li>
-                <li>
-                  <strong className="text-text">Produce Quality</strong> — fresh vs
-                  rotten → Grade A/B/C after harvest (separate model)
-                </li>
-                <li>Mandi price fetch + fair-price suggestion (A+10% / B / C−20%)</li>
-                <li>Yield simulator + crop/fertilizer advisory (honest lookup until ONNX)</li>
-                <li>Draft Grade Card + market listing fields</li>
+              <ul className="space-y-2 p-4 text-sm text-muted">
+                {col.points.map((p) => (
+                  <li key={p} className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan/70" />
+                    {p}
+                  </li>
+                ))}
               </ul>
             </div>
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-harvest">
-                Humans
+          ))}
+        </div>
+      </RevealOnScroll>
+
+      {/* Cost-benefit with visual math */}
+      <RevealOnScroll immediate delay={0.1} className="mt-10">
+        <p className="section-label mb-3">Cost-benefit</p>
+        <h2 className="font-display text-xl font-bold text-text">
+          Payback in three batches
+        </h2>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <Card className="text-center !bg-[var(--surface)]">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted">
+              Waste @ 8% · 50kg
+            </p>
+            <p className="mt-2 font-mono text-2xl font-semibold text-danger">
+              ₹<Counter value={wasteBefore} />
+            </p>
+          </Card>
+          <Card className="text-center !bg-[var(--surface)]">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted">
+              Waste @ 3% · 50kg
+            </p>
+            <p className="mt-2 font-mono text-2xl font-semibold text-healthy">
+              ₹<Counter value={wasteAfter} />
+            </p>
+          </Card>
+          <Card className="text-center border-cyan/30 !bg-cyan/5">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-cyan">
+              Saved / batch
+            </p>
+            <p className="mt-2 font-mono text-2xl font-semibold text-text">
+              ₹<Counter value={saved} />
+            </p>
+            <p className="mt-1 text-[11px] text-muted">at ₹400/kg illustrative</p>
+          </Card>
+        </div>
+        <div className="mt-4 divide-y divide-[var(--border)] rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4">
+          {COST_ROWS.map((row) => (
+            <div
+              key={row.item}
+              className="flex items-center justify-between gap-3 py-3 text-sm first:pt-3 last:pb-3"
+            >
+              <div>
+                <p className="text-muted">{row.item}</p>
+                <p className="font-mono text-[10px] text-dim">{row.note}</p>
+              </div>
+              <span className="font-mono font-medium text-text">{row.value}</span>
+            </div>
+          ))}
+        </div>
+      </RevealOnScroll>
+
+      {/* AI vs Humans */}
+      <RevealOnScroll immediate delay={0.12} className="mt-10">
+        <p className="section-label mb-3">Role split</p>
+        <h2 className="font-display text-xl font-bold text-text">
+          What AI does / What humans do
+        </h2>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-5">
+            <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-cyan">
+              <Scale className="h-3.5 w-3.5" aria-hidden /> AI
+            </p>
+            <ul className="mt-3 space-y-2 text-sm text-muted">
+              <li>
+                <strong className="text-text">Leaf Health</strong> — disease while
+                the plant grows
+              </li>
+              <li>
+                <strong className="text-text">Produce Quality</strong> — Grade A/B/C
+                after harvest
+              </li>
+              <li>Mandi modal + fair-price suggestion</li>
+              <li>Yield optimizer + crop/fertilizer advisory</li>
+              <li>Draft Grade Card fields</li>
+            </ul>
+          </div>
+          <div className="rounded-[var(--radius)] border border-harvest/30 bg-harvest/5 p-5">
+            <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-harvest">
+              <Users className="h-3.5 w-3.5" aria-hidden /> Humans
+            </p>
+            <ul className="mt-3 space-y-2 text-sm text-muted">
+              <li>Supervisor override when confidence &lt; {gatePct}%</li>
+              <li>Final reject / accept on the line</li>
+              <li>Negotiate price and publish listings</li>
+              <li>Agri-extension advice on pesticides</li>
+              <li>Own the relationship with the buyer</li>
+            </ul>
+          </div>
+        </div>
+      </RevealOnScroll>
+
+      {/* Bias — leaf ≠ fruit with samples */}
+      <RevealOnScroll immediate delay={0.14} className="mt-10">
+        <div className="overflow-hidden rounded-[var(--radius-lg)] border border-warning/20 bg-[var(--surface)]">
+          <div className="grid sm:grid-cols-2">
+            <div className="relative h-40 sm:h-auto">
+              <img
+                src="/samples/produce/apple_fruit/apple_fresh.jpg"
+                alt="Harvested apple — produce grading"
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+                onError={(e) => {
+                  ;(e.target as HTMLImageElement).src =
+                    '/photos/Vegetable-Shopping.jpg'
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)]/80 to-transparent sm:bg-gradient-to-r" />
+              <p className="absolute bottom-3 left-3 font-mono text-[10px] uppercase tracking-widest text-healthy">
+                Produce · Grade A/B/C
               </p>
-              <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-muted">
-                <li>Supervisor override when confidence &lt; 70%</li>
-                <li>Final reject / accept on the line</li>
-                <li>Negotiate price and publish listings</li>
-                <li>Choose pesticides with agri-extension advice</li>
+            </div>
+            <div className="p-5 sm:p-6">
+              <h2 className="font-display text-lg font-semibold text-text">
+                Bias acknowledgment
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted">
+                <strong className="text-text">Leaf ≠ fruit.</strong> PlantVillage
+                is lab leaf imagery for disease risk while growing. Market grades
+                come only from the separate Produce Quality model. Field photos
+                still differ from lab data — the {gatePct}% HITL gate exists
+                because the model will be uncertain on unfamiliar inputs.
+              </p>
+            </div>
+          </div>
+        </div>
+      </RevealOnScroll>
+
+      {/* SDGs */}
+      <RevealOnScroll immediate delay={0.16} className="mt-10">
+        <p className="section-label mb-3">SDG mapping</p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {SDGS.map((s) => (
+            <div
+              key={s.code}
+              className="rounded-[var(--radius)] border border-healthy/25 bg-healthy/5 p-4"
+            >
+              <p className="font-mono text-2xl font-semibold text-healthy">
+                {s.code}
+              </p>
+              <h3 className="mt-1 font-semibold text-text">{s.title}</h3>
+              <p className="mt-2 text-sm text-muted">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </RevealOnScroll>
+
+      {/* Credits */}
+      <RevealOnScroll immediate delay={0.18} className="mt-10">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
+          <div className="flex items-start gap-3">
+            <Landmark className="mt-0.5 h-5 w-5 text-cyan" aria-hidden />
+            <div>
+              <h2 className="font-semibold text-text">Team credits</h2>
+              <p className="mt-2 text-sm text-muted">
+                SP Jain School of Global Management — MAIB · AI in Operations.
+              </p>
+              <ul className="mt-4 space-y-2 text-sm text-muted">
+                <li>
+                  <span className="font-medium text-text">Group 3</span> — Annadata
+                  / AgroSight (inspect → price → yield → market)
+                </li>
+                <li>
+                  <span className="font-medium text-text">Faculty</span> — Dr.
+                  Sandip Kumar Roy
+                </li>
+                <li>
+                  <span className="font-medium text-text">Open stack</span> —
+                  PlantVillage, Agmarknet, Open-Meteo, Kaggle crop/fertilizer,
+                  Ollama
+                </li>
               </ul>
             </div>
           </div>
-        </Card>
-      </RevealOnScroll>
-
-      <RevealOnScroll immediate delay={0.16} className="mt-8">
-        <Card className="border-healthy/20">
-          <h2 className="font-semibold text-text">SDG mapping</h2>
-          <p className="mt-3 text-sm text-muted">
-            <strong className="text-text">SDG 2</strong> Zero Hunger — reduce post-harvest
-            loss via early blight detection and better grading.{' '}
-            <strong className="text-text">SDG 8</strong> Decent Work — elevate rural
-            workers with tools, not replace them.{' '}
-            <strong className="text-text">SDG 12</strong> Responsible consumption —
-            transparent Grade Cards for buyers.
-          </p>
-        </Card>
-      </RevealOnScroll>
-
-      <RevealOnScroll immediate delay={0.18} className="mt-8">
-        <Card>
-          <h2 className="font-semibold text-text">Team credits</h2>
-          <p className="mt-2 text-sm text-muted">
-            SP Jain School of Global Management — MAIB program, AI in Operations.
-          </p>
-          <ul className="mt-4 space-y-2 text-sm text-muted">
-            <li>
-              <span className="font-medium text-text">Group 3</span> — Annadata /
-              AgroSight product build (inspect → price → advisory → market)
-            </li>
-            <li>
-              <span className="font-medium text-text">Faculty</span> — Dr. Sandip Kumar
-              Roy (course mentor)
-            </li>
-            <li>
-              <span className="font-medium text-text">Open data & models</span> —
-              PlantVillage, Agmarknet (data.gov.in), Open-Meteo, Kaggle crop/fertilizer
-              schemas, Ollama (local LLM)
-            </li>
-          </ul>
-        </Card>
+        </div>
       </RevealOnScroll>
 
       <p className="mt-12 text-center font-mono text-xs text-dim">

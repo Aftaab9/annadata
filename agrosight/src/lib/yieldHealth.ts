@@ -49,7 +49,7 @@ export const HEALTH_COLORS: Record<ParamHealth, string> = {
   bad: 'var(--danger)',
 }
 
-export function getBottleneckReason(params: YieldParams): string | null {
+export function getBottleneckReasons(params: YieldParams): string[] {
   const reasons: string[] = []
 
   if (params.machine_speed_rpm > 900 && params.moisture_pct > 18) {
@@ -78,7 +78,11 @@ export function getBottleneckReason(params: YieldParams): string | null {
     )
   }
 
-  return reasons[0] ?? null
+  return reasons
+}
+
+export function getBottleneckReason(params: YieldParams): string | null {
+  return getBottleneckReasons(params)[0] ?? null
 }
 
 export function formatParamValue(key: keyof YieldParams, value: number): string {

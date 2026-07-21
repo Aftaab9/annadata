@@ -87,7 +87,8 @@ export function BuyerBrowse({
 
       {listings.length === 0 && (
         <Card className="py-10 text-center text-sm text-muted">
-          No listings match these filters. Try clearing crop or grade.
+          No listings match these filters. Clear crop / grade / state, or tap Refresh
+          on the Market page — demo stock loads from Supabase automatically.
         </Card>
       )}
 

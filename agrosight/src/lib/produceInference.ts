@@ -1,23 +1,22 @@
 import * as tf from '@tensorflow/tfjs'
-import { imageToInputTensor } from './imageTensor'
 import {
   getTfliteRuntime,
   resetTfliteRuntime,
   type TfliteGlobal,
 } from './tfliteRuntime'
 
+const IMG_SIZE = 224
+
 const _base = import.meta.env.BASE_URL || '/'
 const _root = _base.endsWith('/') ? _base : `${_base}/`
 export const PRODUCE_MODEL_PATH = `${_root}models/agrosight_produce.tflite`
 
-/** Produce quality classes (Healthy vs Rotten style) */
 export type ProduceClass = 'FRESH' | 'BORDERLINE' | 'ROTTEN'
 
 export interface ProduceResult {
   class: ProduceClass
   confidence: number
   probabilities: Record<ProduceClass, number>
-  /** Market grade mapped from produce quality */
   grade: 'A' | 'B' | 'C'
   defectRatePct: number
   inferenceMs: number
@@ -73,9 +72,9 @@ export async function loadProduceModel(force = false): Promise<boolean> {
   }
 
   try {
-    const res = await fetch(PRODUCE_MODEL_PATH, { cache: 'no-store' })
+    const res = await fetch(`${PRODUCE_MODEL_PATH}?bin=1`, { cache: 'no-store' })
     if (!res.ok) {
-      produceError = `Produce TFLite missing (${res.status}). Run Colab notebook & drop agrosight_produce.tflite into public/models/`
+      produceError = `Produce TFLite missing (${res.status})`
       produceReady = true
       produceMock = true
       notify()
@@ -87,7 +86,7 @@ export async function loadProduceModel(force = false): Promise<boolean> {
     produceMock = false
     produceReady = true
     produceError = null
-    console.info('[AgroSight] Produce TFLite loaded')
+    console.info('[AgroSight] Produce binary TFLite loaded (P(Rotten) sigmoid)')
     notify()
     return true
   } catch (e) {
@@ -112,20 +111,81 @@ function mapToGrade(
   return { grade: 'C', defectRatePct: 28 }
 }
 
-function parseProduceProbs(raw: ArrayLike<number>): number[] {
-  const probs = Array.from(raw).slice(0, 3)
-  const sum = probs.reduce((a, b) => a + b, 0)
-  if (sum === 0 || probs.every((p) => p === 0)) {
-    throw new Error('Produce TFLite returned zeros — re-export fp32 model')
+/** Same as Colab: bilinear 224 crop, RGB float / 255 */
+function imageToProduceTensor(
+  source: HTMLImageElement | HTMLCanvasElement | ImageBitmap,
+): tf.Tensor4D {
+  const canvas = document.createElement('canvas')
+  canvas.width = IMG_SIZE
+  canvas.height = IMG_SIZE
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })
+  if (!ctx) throw new Error('Canvas 2D unavailable')
+
+  const w = (source as HTMLImageElement).width || IMG_SIZE
+  const h = (source as HTMLImageElement).height || IMG_SIZE
+  const side = Math.min(w, h)
+  const sx = (w - side) / 2
+  const sy = (h - side) / 2
+  ctx.drawImage(source as CanvasImageSource, sx, sy, side, side, 0, 0, IMG_SIZE, IMG_SIZE)
+
+  const { data } = ctx.getImageData(0, 0, IMG_SIZE, IMG_SIZE)
+  const floats = new Float32Array(IMG_SIZE * IMG_SIZE * 3)
+  let j = 0
+  for (let i = 0; i < data.length; i += 4) {
+    floats[j++] = data[i]! / 255
+    floats[j++] = data[i + 1]! / 255
+    floats[j++] = data[i + 2]! / 255
   }
-  if (sum > 0.95 && sum < 1.05) return probs
-  const max = Math.max(...probs)
-  const exps = probs.map((p) => Math.exp(p - max))
-  const expSum = exps.reduce((a, b) => a + b, 0)
-  return exps.map((e) => e / expSum)
+  return tf.tensor4d(floats, [1, IMG_SIZE, IMG_SIZE, 3])
 }
 
-/** Heuristic mock until Colab produce model is dropped in */
+/**
+ * Model output is P(Rotten) in [0,1] from the trained Dense+Sigmoid head.
+ * Thresholds: <0.4 Fresh, >0.6 Rotten, else Borderline — confidence = model score.
+ */
+function fromBinaryRottenProb(pRottenRaw: number): {
+  class: ProduceClass
+  confidence: number
+  probabilities: Record<ProduceClass, number>
+} {
+  const pRotten = Math.min(1, Math.max(0, pRottenRaw))
+  const pFresh = 1 - pRotten
+  let cls: ProduceClass
+  let confidence: number
+  if (pRotten < 0.4) {
+    cls = 'FRESH'
+    confidence = pFresh
+  } else if (pRotten > 0.6) {
+    cls = 'ROTTEN'
+    confidence = pRotten
+  } else {
+    cls = 'BORDERLINE'
+    confidence = 1 - Math.abs(pRotten - 0.5) * 2
+  }
+  return {
+    class: cls,
+    confidence,
+    probabilities: {
+      FRESH: pFresh,
+      BORDERLINE: cls === 'BORDERLINE' ? confidence : Math.min(pFresh, pRotten),
+      ROTTEN: pRotten,
+    },
+  }
+}
+
+/** Legacy 3-way softmax fallback (should not be needed after binary extract). */
+function fromSoftmax3(vals: number[]): ReturnType<typeof fromBinaryRottenProb> {
+  let f = vals[0] ?? 0
+  let b = vals[1] ?? 0
+  let r = vals[2] ?? 0
+  const s = f + b + r || 1
+  f /= s
+  b /= s
+  r /= s
+  // Recover underlying P(Rotten) ≈ r/(f+r) from ThreeWay math
+  return fromBinaryRottenProb(r / (f + r + 1e-9))
+}
+
 async function classifyProduceMock(
   source: HTMLImageElement | HTMLCanvasElement,
   start: number,
@@ -142,23 +202,11 @@ async function classifyProduceMock(
       hash = (hash * 31 + (data[i] ?? 0)) % 10000
     }
   }
-  const r = (n: number) => ((hash * n * 9301 + 49297) % 233280) / 233280
-  const raw = [r(1) + 0.35, r(2) + 0.2, r(3) + 0.15]
-  const sum = raw.reduce((a, b) => a + b, 0)
-  const probs = raw.map((v) => v / sum)
-  const maxIdx = probs.indexOf(Math.max(...probs))
-  const classes: ProduceClass[] = ['FRESH', 'BORDERLINE', 'ROTTEN']
-  const cls = classes[maxIdx] ?? 'FRESH'
-  const confidence = probs[maxIdx] ?? 0.5
-  const { grade, defectRatePct } = mapToGrade(cls, confidence)
+  const pRotten = ((hash * 9301 + 49297) % 233280) / 233280
+  const parsed = fromBinaryRottenProb(pRotten)
+  const { grade, defectRatePct } = mapToGrade(parsed.class, parsed.confidence)
   return {
-    class: cls,
-    confidence,
-    probabilities: {
-      FRESH: probs[0] ?? 0,
-      BORDERLINE: probs[1] ?? 0,
-      ROTTEN: probs[2] ?? 0,
-    },
+    ...parsed,
     grade,
     defectRatePct,
     inferenceMs: Math.round(performance.now() - start + 120),
@@ -177,32 +225,31 @@ export async function classifyProduce(
     return classifyProduceMock(imageSource, start)
   }
 
-  const input = imageToInputTensor(imageSource)
+  const input = imageToProduceTensor(imageSource)
   try {
     const rawOut = produceModel.predict(input)
     const output = (Array.isArray(rawOut) ? rawOut[0] : rawOut) as tf.Tensor
-    const raw = await output.data()
-    const normalized = parseProduceProbs(raw)
+    const raw = Array.from(await output.data())
     input.dispose()
     output.dispose()
 
-    const maxIdx = normalized.reduce(
-      (best, p, i) => (p > (normalized[best] ?? 0) ? i : best),
-      0,
-    )
-    const classes: ProduceClass[] = ['FRESH', 'BORDERLINE', 'ROTTEN']
-    const cls = classes[maxIdx] ?? 'FRESH'
-    const confidence = normalized[maxIdx] ?? 0
-    const { grade, defectRatePct } = mapToGrade(cls, confidence)
+    const parsed =
+      raw.length <= 2
+        ? fromBinaryRottenProb(Number(raw[0]))
+        : fromSoftmax3(raw)
 
+    console.info('[AgroSight] produce binary', {
+      raw: raw.slice(0, 3).map((x) => +Number(x).toFixed(4)),
+      class: parsed.class,
+      confidence: +parsed.confidence.toFixed(4),
+      P_Rotten: parsed.probabilities.ROTTEN,
+    })
+
+    const { grade, defectRatePct } = mapToGrade(parsed.class, parsed.confidence)
     return {
-      class: cls,
-      confidence,
-      probabilities: {
-        FRESH: normalized[0] ?? 0,
-        BORDERLINE: normalized[1] ?? 0,
-        ROTTEN: normalized[2] ?? 0,
-      },
+      class: parsed.class,
+      confidence: parsed.confidence,
+      probabilities: parsed.probabilities,
       grade,
       defectRatePct,
       inferenceMs: Math.round(performance.now() - start),

@@ -111,12 +111,13 @@ export function YieldAdvisoryPanel() {
   return (
     <Card>
       <p className="font-mono text-[10px] uppercase tracking-widest text-cyan">
-        Yield predictor · trained regression
+        Yield optimizer · trained regression
       </p>
       <p className="mt-2 text-sm text-muted">
-        Seven processing parameters for{' '}
-        <strong className="text-text">{selectedCrop.label}</strong> batches — defect
-        rate auto-fills from your last inspection.
+        Simulate SME line yield from moisture, raw-material grade, defect rate, and
+        processing params for{' '}
+        <strong className="text-text">{selectedCrop.label}</strong>. CV auto-fills
+        quality inputs from Inspect.
       </p>
 
       {defectRateAutoFilled && cvResult ? (
@@ -145,7 +146,7 @@ export function YieldAdvisoryPanel() {
 
       <Link to="/yield" className="mt-5 inline-flex w-full no-underline">
         <Button className="w-full">
-          Open yield simulator
+          Open yield optimizer
           <ArrowRight className="h-4 w-4" aria-hidden />
         </Button>
       </Link>

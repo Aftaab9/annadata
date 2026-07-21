@@ -8,6 +8,7 @@ import {
   expressInterestAsync,
   fairPriceBreakdown,
   filterListings,
+  getMandiPrices,
   getMarketBackend,
   getMyInterests,
   listMarketingsAsync,
@@ -36,6 +37,7 @@ export default function Market() {
   const gradeCard = useStore((s) => s.gradeCard)
   const location = useStore((s) => s.location)
   const setLocation = useStore((s) => s.setLocation)
+  const setPriceModal = useStore((s) => s.setPriceModal)
   const priceModal = useStore((s) => s.priceModal)
 
   const [view, setView] = useState<View>('farmer')
@@ -43,6 +45,9 @@ export default function Market() {
   const [backend, setBackend] = useState<MarketBackend>(getMarketBackend())
   const [loading, setLoading] = useState(true)
   const [syncError, setSyncError] = useState<string | null>(null)
+  const [priceSource, setPriceSource] = useState<'live' | 'cache' | 'snapshot' | null>(
+    null,
+  )
   const [interestedIds, setInterestedIds] = useState(() => getMyInterests())
   const [filters, setFilters] = useState<MarketFilters>({
     crop: 'all',
@@ -77,6 +82,25 @@ export default function Market() {
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  // Live Agmarknet modal → fair list price (data.gov.in)
+  useEffect(() => {
+    let cancelled = false
+    const commodity =
+      crop === 'Pepper' ? 'Green Chilli' : crop === 'Soybean' ? 'Soyabean' : crop
+    void getMandiPrices({
+      state: location.state,
+      commodity,
+      limit: 40,
+    }).then((r) => {
+      if (cancelled || !r.modal_price) return
+      setPriceModal(r.modal_price)
+      setPriceSource(r.source)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [crop, location.state, setPriceModal])
 
   useEffect(() => {
     return subscribeListings((next) => {
@@ -165,6 +189,20 @@ export default function Market() {
         (not Leaf Health). Fair price = live mandi modal ± grade premium (A +10% /
         B / C −20%).
       </p>
+      <div className="mt-5 grid grid-cols-2 gap-2 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] sm:grid-cols-3">
+        <img
+          src="/photos/vegetable-mandi.jpg"
+          alt="Vegetable mandi"
+          className="aspect-[16/10] h-full w-full object-cover sm:col-span-2"
+          loading="lazy"
+        />
+        <img
+          src="/photos/male-farmers.jpg"
+          alt="Farmers"
+          className="hidden aspect-[16/10] h-full w-full object-cover sm:block"
+          loading="lazy"
+        />
+      </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <p
@@ -180,6 +218,11 @@ export default function Market() {
             ? 'Live · Supabase (multi-device)'
             : 'This device · localStorage'}
         </p>
+        {priceSource && (
+          <p className="inline-flex items-center gap-1.5 rounded-lg border border-cyan/30 bg-cyan/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-cyan">
+            Mandi ₹{mandi.toLocaleString('en-IN')}/q · {priceSource}
+          </p>
+        )}
         <Button
           type="button"
           variant="ghost"

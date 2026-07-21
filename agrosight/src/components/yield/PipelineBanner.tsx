@@ -6,9 +6,14 @@ import { DEFECT_LABELS } from '@/lib/constants'
 interface PipelineBannerProps {
   defectRate: number
   cvResult?: ClassificationResult | null
+  materialGrade?: number
 }
 
-export function PipelineBanner({ defectRate, cvResult }: PipelineBannerProps) {
+export function PipelineBanner({
+  defectRate,
+  cvResult,
+  materialGrade,
+}: PipelineBannerProps) {
   return (
     <Card className="pipeline-banner relative overflow-hidden border-cyan/50 bg-cyan/5">
       <div className="absolute inset-0 bg-gradient-to-r from-cyan/10 via-transparent to-indigo/10" />
@@ -21,9 +26,16 @@ export function PipelineBanner({ defectRate, cvResult }: PipelineBannerProps) {
             CV → Yield pipeline linked
           </p>
           <p className="mt-1 text-sm text-text">
-            Defect rate auto-filled at{' '}
-            <strong className="font-mono text-cyan">{defectRate}%</strong> from your
-            inspection
+            Defect rate{' '}
+            <strong className="font-mono text-cyan">{defectRate}%</strong>
+            {materialGrade != null && (
+              <>
+                {' '}
+                · material grade{' '}
+                <strong className="font-mono text-cyan">{materialGrade}/5</strong>
+              </>
+            )}{' '}
+            from inspection
             {cvResult && (
               <>
                 {' '}
@@ -36,7 +48,8 @@ export function PipelineBanner({ defectRate, cvResult }: PipelineBannerProps) {
             )}
           </p>
           <p className="mt-1 text-xs text-muted">
-            Adjust other sliders to see how quality impacts throughput and yield.
+            Move moisture / grade / defects (high impact) to watch yield and
+            throughput change.
           </p>
         </div>
       </div>

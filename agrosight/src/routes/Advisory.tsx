@@ -40,6 +40,20 @@ export default function Advisory() {
         What to plant → soil nutrients → expected yield → harvest weather. Yield engine
         is trained; crop/fertilizer use lookups until you drop Colab ONNX files.
       </p>
+      <div className="mt-5 flex gap-2 overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
+        <img
+          src="/photos/fertilizer-1.jpg"
+          alt="Fertilizer bags"
+          className="h-28 w-1/2 object-cover sm:h-36"
+          loading="lazy"
+        />
+        <img
+          src="/photos/fertilizer-2.jpeg"
+          alt="Field fertilizer use"
+          className="h-28 w-1/2 object-cover sm:h-36"
+          loading="lazy"
+        />
+      </div>
       {onnx && (
         <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-dim">
           Artifacts · crop ONNX {onnx.cropRec ? 'ready' : 'pending'} · fert ONNX{' '}
