@@ -10,27 +10,30 @@
   ],
   "classes": [
     "apple",
-    "banana",
-    "blackgram",
-    "chickpea",
-    "coconut",
-    "coffee",
-    "cotton",
-    "grapes",
-    "jute",
-    "kidneybeans",
-    "lentil",
     "maize",
-    "mango",
-    "mothbeans",
-    "mungbean",
-    "muskmelon",
-    "orange",
-    "papaya",
-    "pigeonpeas",
-    "pomegranate",
-    "rice",
-    "watermelon"
+    "pepper",
+    "potato",
+    "soybean",
+    "tomato"
   ],
-  "accuracy": 99.32
+  "accuracy": 96.74,
+  "sku_aligned": true,
+  "annadata_crops": [
+    "apple",
+    "maize",
+    "pepper",
+    "potato",
+    "soybean",
+    "tomato"
+  ],
+  "data_sources": {
+    "apple": "Kaggle atharvaingle/crop-recommendation-dataset",
+    "maize": "Kaggle atharvaingle/crop-recommendation-dataset",
+    "pepper": "agronomic envelope (ICAR/FAO ranges)",
+    "potato": "agronomic envelope (ICAR/FAO ranges)",
+    "soybean": "agronomic envelope (ICAR/FAO ranges)",
+    "tomato": "agronomic envelope (ICAR/FAO ranges)"
+  },
+  "exported": "random_forest",
+  "zipmap": false
 }

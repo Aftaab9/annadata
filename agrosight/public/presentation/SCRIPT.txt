@@ -1,0 +1,526 @@
+﻿================================================================================
+ANNADATA / AGROSIGHT — FULL PRESENTATION SCRIPT (DETAILED)
+SP Jain MAIB · Group 3 · Aftaab · Isaac · Ishaan
+Total target: ~12–14 minutes + Q&A
+================================================================================
+
+FACULTY WORKFLOW DECK (screen-by-screen, real app captures)
+------------------------------------------------------------
+Open:  presentation\workflow.html
+Script: presentation\SCRIPT_WORKFLOW.txt
+Keys:  → ←  ·  Space  ·  click left/right half
+This is the end-to-end demo path: Leaf → Produce → Yield → Prices → Market →
+Advisory → Insights (training charts) → Ethics.
+
+
+ORDER OF THE DAY
+----------------
+1) ISAAC     → HTML problem pitch (expanded “why”)   
+2) AFTAAB    → Live farmer application (core)  OR walk workflow.html      
+3) ISHAAN    → Training / KPIs / Insights + Ethics     
+4) ALL       → Short close + Q&A
+
+FILES / URLS
+------------
+Pitch (NOT inside the app):
+  Open:  C:\Users\ADMIN\Desktop\AIO-Final\presentation\index.html
+  Keys:  → ←  ·  Space  ·  click left/right half of screen
+
+Farmer app:
+  Local:   http://localhost:5173
+  Live:    https://annadata-lake.vercel.app
+
+Demo samples (Aftaab):
+  Leaf:     Mock-Images\plantvillage\<crop>\
+  Produce:  agrosight\public\samples\produce\  OR  Mock-Images\plantvillage\*_fruit\
+
+
+================================================================================
+PART 1 — ISAAC · PROBLEM PITCH (HTML)
+Open presentation\index.html  ·  stay on this until slide 6 handoff
+Speak slowly. You set the “why” so Aftaab’s demo and Ishaan’s KPIs land.
+================================================================================
+
+--- SLIDE 1 · Title (35–40 sec) ---
+
+ISAAC:
+“Good morning / afternoon. We are Group 3 from the MAIB program —
+Aftaab, Ishaan, and I’m Isaac.
+
+Our project is Annadata — also known as AgroSight.
+The assignment title is AI-driven quality inspection and yield
+optimization for rural food-processing units.
+
+In plain language: help a small rural processor catch bad batches earlier,
+predict processing yield from real inputs, and sell graded produce more fairly —
+without replacing the workers who still own the final decision.
+
+I’ll frame the problem and the brief.
+Aftaab will take you through the live farmer application —
+inspect, price, yield, market.
+Ishaan will walk the research side — what we trained, how we split data,
+the hold-out KPIs on Insights — and our ethics framework.”
+
+[Advance →]
+
+
+--- SLIDE 2 · The setting (40–45 sec) ---
+
+ISAAC:
+“Start with the setting — not a factory floor in a metro, but a rural
+food-processing SME.
+
+These units handle spices, grains, vegetables, sometimes dairy.
+Teams are small. Margins are thin. One bad truck or one wet batch can
+wipe out a week’s profit.
+
+Today, quality still depends heavily on the human eye and hand.
+That skill is real — but it varies by person, by shift, by fatigue,
+and it does not leave a digital grade that a mandi buyer will trust.
+
+So the opportunity is not ‘replace the sorter.’
+It is: give that sorter a consistent second opinion, a grade language,
+and a link from quality into price and yield.”
+
+[Advance →]
+
+
+--- SLIDE 3 · What breaks (55–65 sec) ---
+
+ISAAC:
+“Three leaks quietly destroy value.
+
+First — defects slip through.
+Visual sorting is inconsistent. Defective lots get packed, then rejected
+downstream — or worse, reach a buyer and damage trust.
+Every reject is wasted raw material, labour, and transport.
+
+Second — yield stays guessed.
+Processing yield depends on moisture, raw-material grade, defect rate,
+machine speed, temperature, duration.
+Supervisors often tune by feel. There is no shared simulator that says:
+‘if moisture is twenty-three percent and grade is low, expect this yield
+and this bottleneck.’
+
+Third — price is negotiated blind.
+The farm gate, the processing line, and the mandi do not share one
+trusted grade. Premium produce often sells like average produce.
+Without Grade A / B / C tied to inspection, the farmer cannot defend
+a fair premium over the mandi modal.”
+
+[Advance →]
+
+
+--- SLIDE 4 · The brief (50–55 sec) ---
+
+ISAAC:
+“Faculty asked for a full operations story — not one accuracy number on a slide.
+
+The brief requires:
+• computer vision for product defect / quality inspection
+• predictive analytics for yield — using raw-material quality, moisture,
+  and processing parameters
+• production simulation to find bottlenecks and improve throughput
+• a dashboard for defect rate, yield trends, and process efficiency
+• and an ethical discussion of automation on rural employment and
+  skill displacement
+
+We also had to be honest about AI in manufacturing and food processing:
+models are trained on specific data; field photos differ from lab photos;
+so a human-in-the-loop gate is part of the product, not an afterthought.
+
+Our bar: a working line — inspect → price → process → sell —
+with humans still deciding.”
+
+[Advance →]
+
+
+--- SLIDE 5 · Stakes (40–45 sec) ---
+
+ISAAC:
+“The stakes are rupees, not slides.
+
+Illustrative math we also show live on Ethics:
+if defect rate falls from about eight percent to three percent
+on a fifty-kilogram batch priced at four hundred rupees a kilo,
+you avoid roughly a thousand rupees of waste per cleaned batch.
+
+Against a deployment cost around twenty-five hundred rupees a month —
+phone plus hosting, no fancy plant hardware —
+payback is on the order of three good batches.
+
+That is why this is an operations project, not only a computer-vision demo.
+Ishaan will connect those rupees to our measured model KPIs and the
+HITL employment story.”
+
+[Advance →]
+
+
+--- SLIDE 6 · Handoff (25–30 sec) ---
+
+ISAAC:
+“Our answer is Annadata —
+on-device leaf and produce inspection,
+fair price linked to public Agmarknet mandi data,
+a yield optimizer with bottleneck simulation,
+a direct marketplace with grade cards,
+and an ethics layer that keeps workers in the loop.
+
+The app you are about to see is built for farmers and line supervisors —
+not for this PowerPoint.
+I’ll hand over to Aftaab for the live product.”
+
+[Stop HTML. Switch browser / projector to the app home page.]
+
+
+================================================================================
+PART 2 — AFTAAB · LIVE FARMER APPLICATION (CORE PRODUCT)
+Start at: /   (Landing)
+You own almost all product concepts. Speak while clicking. Don’t rush.
+================================================================================
+
+PRE-CHECK (before you stand up — silent)
+- App open on Landing
+- Produce samples ready (fresh + rotten apple/tomato)
+- Optional: one leaf sample for Leaf Health
+- Market should already show listings (Supabase seeded)
+
+
+--- A1. Landing · what Annadata is (40–45 sec) ---
+
+AFTAAB:
+“Thank you Isaac. This is the live product — built for farmers and
+rural processing teams, not a pitch deck.
+
+Annadata connects four jobs on one phone or laptop:
+inspect quality, check fair price, optimize processing yield,
+and sell direct with a grade card.
+
+Important design choice up front — Dual Inspect.
+Leaf Health is for the plant while it is growing.
+Produce Quality is for harvested fruit and vegetables after harvest.
+We never pretend leaf disease equals market grade.
+Leaf is not fruit — two models, two jobs.”
+
+[Click into Inspect — or nav → Inspect]
+
+
+--- A2. Inspect · Leaf Health (60–75 sec) ---
+
+AFTAAB:
+“First path — Leaf Health.
+
+I pick a crop SKU — say tomato or apple — then upload a leaf image.
+
+[Upload leaf sample. Wait for result.]
+
+The model returns a class — healthy, surface defect, or blight/mold —
+with confidence and per-class probabilities.
+We also recommend an action: pass, review, or reject.
+
+If confidence falls below seventy percent, we do not silently automate.
+A human supervisor must review. That same gate protects marketplace
+listing later — Ishaan will show the ethics side of that rule.
+
+Leaf mode is plant-health diagnosis. It is not a mandi grade.”
+
+[Optional one sentence: “Now the post-harvest path — Produce Quality.”]
+
+
+--- A3. Inspect · Produce Quality (90–110 sec) · HERO ---
+
+AFTAAB:
+“Second path — Produce Quality. This is harvested batch grading.
+
+[Switch to Produce Quality mode. Select crop. Upload FRESH sample.]
+
+
+
+--- A7. Hand off to Ishaan (15–20 sec) ---
+
+AFTAAB:
+“So the farmer journey is: inspect honestly, price from mandi plus
+grade, optimize the processing line, and sell with a grade card.
+
+Ishaan will show how the session builds a live dashboard —
+and how we treat ethics and rural employment.”
+
+[Ishaan takes keyboard / pointer]
+
+
+================================================================================
+PART 3 — ISHAAN · RESEARCH KPIs + INSIGHTS + ETHICS
+You own: what we trained, splits, architecture bake-offs, hold-out numbers,
+Insights dashboard, Ethics. Speak like the research lead. Point at numbers on screen.
+Target: ~5–6 minutes (this section is intentionally the longest talk track).
+================================================================================
+
+KPI CARD (memorize — say these exactly; they are Colab hold-out measured)
+
+  Leaf Health CV ........... 97.4%   EfficientNetB0 winner (PlantVillage)
+  Produce Quality .......... ~97.0%  ResNet50 winner (96.96% acc / 97.12% F1)
+  Crop recommendation ...... 99.3%   RandomForest → ONNX
+  Fertilizer classifier .... 100%    RandomForest → ONNX (hold-out)
+  Price forecast MAPE ...... 3.4%    GradientBoostingRegressor
+  Yield MAPE ............... 3.52%   linear / tree regressor hold-out
+  Beans pilot (early) ...... 94.2%   Makerere 3-class before PlantVillage scale-up
+  Architectures compared ... 5       same splits / epochs for fair bake-off
+
+  Produce bake-off (say if asked):
+    ResNet50      ~97.0% acc  ← deployed
+    MobileNetV2   ~92.0%
+    EfficientNetB0 ~85.3%  (on this produce task; leaf used EfficientNet)
+
+
+--- I0. Bridge + research agenda (25–30 sec) ---
+
+ISHAAN:
+“Thanks Aftaab. Isaac framed the problem; you showed the farmer product.
+I’ll cover the research layer the brief also grades us on —
+what we trained in Colab, how we split data, which models won,
+the KPIs on Insights, and then ethics — automation and rural jobs.
+
+Important honesty rule on this screen:
+we only put numbers on Insights that we measured on hold-out sets.
+Nothing invented for the slide.”
+
+[Open /insights]
+
+
+--- I1. Insights · live session dashboard first (45–50 sec) ---
+
+ISHAAN:
+“First layer — Live Session Analytics.
+Every inspection Aftaab just ran feeds this in real time:
+inspection count, pass rate, average defect rate, average confidence,
+HITL flags when confidence was under seventy percent.
+
+The defect-rate-over-time chart and class pie are the operations
+‘defect rate’ dashboard from the brief — built from this session,
+not a fake CSV.
+
+Below — yield and process-efficiency trends from the Yield Optimizer
+scenarios: yield percent, efficiency score, throughput kilos per hour.
+That is the yield-trend / process-efficiency half of the dashboard.
+
+You can export the session as JSON for the faculty pack.”
+
+
+--- I2. Training story · Computer Vision (2–2.5 min) ---
+
+ISHAAN:
+“Now the models behind Inspect — two separate vision problems.
+
+[Point at Leaf Health KPI card — 97.4%]
+
+ONE — Leaf Health.
+Dataset: PlantVillage leaf disease imagery for our six crop SKUs —
+maize, soybean, pepper, tomato, potato, apple.
+We map diseases into three operations classes the line can act on:
+Healthy, Surface Defect, and Blight & Mold.
+
+We compared five architectures under the same training protocol —
+same splits, same epoch budget — so the bake-off is fair:
+MobileNetV2, EfficientNetB0, ResNet50, DenseNet121, and a custom CNN.
+
+Winner for leaf: EfficientNetB0 on a composite of accuracy and F1.
+Hold-out accuracy: ninety-seven point four percent.
+That TFLite runs on-device in the app for Leaf Health.
+
+Before we scaled to multi-SKU PlantVillage, we ran a Makerere beans
+three-class pilot at ninety-four point two percent — proof the
+pipeline worked, then we scaled.
+
+[Point at Produce Quality KPI — ~97%]
+
+TWO — Produce Quality. Completely separate model.
+This is harvested fruit and vegetables — Fresh versus Rotten —
+then mapped to market Grade A, B, or C.
+We do not reuse the leaf weights. Leaf is not fruit — that bias
+note matters for ethics in a minute.
+
+Produce bake-off in Colab: MobileNetV2, EfficientNetB0, ResNet50.
+Transfer learning — freeze backbone, train head, then light fine-tune.
+Validation split twenty percent from image_dataset_from_directory.
+
+Results on hold-out:
+• MobileNetV2 — about ninety-two percent accuracy
+• EfficientNetB0 — about eighty-five percent on this produce task
+• ResNet50 — winner at ninety-six point nine six percent accuracy
+  and ninety-seven point one two percent F1
+
+We exported the winner to TFLite for the phone/laptop Inspect path.
+Charts for model comparison and confusion matrix are on this Insights
+page when the PNGs are present — that’s the scientific evidence pack.”
+
+
+--- I3. Training story · Tabular / advisory / price / yield (90–110 sec) ---
+
+ISHAAN:
+“Beyond vision — the advisory and forecasting stack.
+
+[Point at Crop 99.3% and Fertilizer 100%]
+
+Crop recommendation and fertilizer advice:
+Kaggle-style tabular datasets — soil NPK, pH, rainfall, and related features.
+Classic train-test split: eighty percent train, twenty percent test,
+stratified, random state forty-two for reproducibility.
+Model: RandomForest — two hundred trees, capped depth —
+exported to ONNX so the browser can run them with onnxruntime-web.
+Hold-out: crop recommendation ninety-nine point three percent;
+fertilizer classifier one hundred percent on that hold-out set.
+High tabular accuracy is expected on these public benchmarks —
+we still ship them as measured, and say so.
+
+[Point at Price MAPE 3.4%]
+
+Price forecasting:
+GradientBoostingRegressor on commodity series for the demo crops.
+Hold-out MAPE about three point four percent —
+mean absolute percentage error, so lower is better.
+Series are exported to JSON for the Prices page forecast view.
+Live mandi modal itself comes from data.gov.in Agmarknet —
+free public API — with snapshot fallback if the network fails.
+We label the source: live, cache, or snapshot.
+
+[Point at Yield MAPE 3.52%]
+
+Yield model:
+Inputs match the brief — moisture, batch weight, ambient temperature,
+processing duration, machine RPM, raw-material grade, defect rate.
+Trained as a regression on processing-yield data; hold-out MAPE
+about three point five two percent.
+In the app Aftaab showed the live simulator: same coefficients,
+bottlenecks and throughput on top — we did not retrain that core
+linear engine for the demo polish; we wired CV defect and grade into it.”
+
+
+--- I4. How to read Insights KPIs (30 sec) ---
+
+ISHAAN:
+“So when you look at this KPI strip — every tile has a ‘how’ line:
+dataset, model family, and that it is hold-out measured.
+Pending would mean we refuse to invent a number.
+That discipline is deliberate for AI in Operations grading.”
+
+
+--- I5. Ethics · HITL + employment (100–120 sec) ---
+
+ISHAAN:
+“Last requirement of the brief — ethics: automation, rural employment,
+skill displacement.
+
+[Open /ethics]
+
+Thesis: built to assist rural workers, not replace them.
+
+[Drag confidence slider below 70%]
+
+Interactive HITL gate — same seventy percent rule as Inspect and Market.
+Below seventy — Human path: listing and batch decisions blocked until
+a supervisor reviews.
+Above seventy — Assist path: AI drafts the Grade Card; human confirms.
+
+Three principles:
+Transparency — show confidence and class probabilities, no silent AI.
+Sovereignty — on-device inference; worker images need not leave the device.
+Skill elevation — AI takes repetitive scanning; people move to validation,
+negotiation, and selling.
+
+Employment honesty:
+Yes — cameras can shrink pure hand-sorting headcount. That risk is real.
+Our design response is skill elevation: fewer wasted batches, same people,
+higher-value work — exception handling and marketplace.
+
+Cost-benefit — Isaac’s rupee story, live on this page:
+eight to three percent defects, about a thousand rupees saved per batch,
+payback near three batches at twenty-five hundred a month.
+
+Bias — Leaf ≠ fruit.
+PlantVillage is lab leaf imagery. Produce grading is a different model
+on harvested goods. Field photos still differ from training photos —
+that is why HITL exists.
+
+SDG 2 Zero Hunger, SDG 8 Decent Work, SDG 12 Responsible Consumption.
+
+Automate the scan. Never remove the human from the decision.”
+
+
+--- I6. Soft close (15 sec) ---
+
+ISHAAN:
+“That’s the research and ethics layer.
+Back to the group for a one-line close and questions.”
+
+
+================================================================================
+PART 4 — GROUP CLOSE (20–25 sec)
+================================================================================
+
+AFTAAB (or Isaac):
+“Annadata: inspect with two honest models, price from public mandi data,
+optimize yield with real process parameters, sell with a grade card,
+and keep a human in the loop.
+Happy to take questions.”
+
+
+================================================================================
+Q&A — WHO ANSWERS WHAT
+================================================================================
+
+Isaac
+• Why this problem / brief mapping / SME setting
+• Cost-benefit story at a high level
+• Why the pitch HTML is separate from the farmer app
+
+Aftaab
+• Leaf vs Produce (why two models) in the product UX
+• Produce grading / Grade A-B-C / Market / Agmarknet fair price
+• Yield simulator scenarios / bottlenecks / throughput
+• Anything about live Inspect demo behaviour
+
+Ishaan  ← research deep-dive
+• All training details: datasets, 80/20 splits, architectures, winners
+• Leaf 97.4% EfficientNetB0 · Produce ~97% ResNet50 bake-off
+• Crop/Fert RF→ONNX · Price MAPE 3.4% · Yield MAPE 3.52%
+• Why only hold-out measured KPIs appear on Insights
+• HITL gate / employment / skill displacement / SDG / leaf≠fruit bias
+• Cost math on Ethics page
+
+
+================================================================================
+TIMING CHEAT SHEET (updated for longer Isaac + Ishaan)
+================================================================================
+0:00   Isaac HTML slides 1–6                         (~3–3.5 min)
+3:30   Aftaab live farmer app (your flow)            (~6–7 min)
+10:30  Ishaan Insights KPIs + training + Ethics      (~5–6 min)
+16:00  Close + Q&A
+
+
+================================================================================
+EMERGENCY LINES (if something fails)
+================================================================================
+Produce model slow / mock on Vercel:
+  “Locally we run the trained TFLite; if the large model isn’t on the
+   host, we show the same UI path with a labeled fallback — the Grade
+   Card flow is what the farmer uses either way.”
+
+Market empty:
+  “Refresh — Supabase auto-seeds demo listings; or I publish one now
+   from the Farmer tab.”
+
+Yield stuck at ~83%:
+  “That’s the default operating point — watch Stressed versus Optimal.”
+
+Agmarknet timeout:
+  “We fall back to a dated snapshot and label the source honestly —
+   live versus snapshot.”
+
+Insights charts thin:
+  Ishaan: “Session charts fill from live Inspect — we can run two more
+  scans. The KPI strip is Colab hold-out measured either way.”
+
+Faculty asks “is 100% fertilizer real?”:
+  Ishaan: “Hold-out accuracy on that public Kaggle split — we report
+  it as measured and still keep HITL on vision decisions where field
+  photos drift from training data.”

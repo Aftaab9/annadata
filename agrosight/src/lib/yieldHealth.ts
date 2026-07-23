@@ -85,6 +85,48 @@ export function getBottleneckReason(params: YieldParams): string | null {
   return getBottleneckReasons(params)[0] ?? null
 }
 
+/** Concrete actions to clear bottlenecks / raise throughput (ops playbook) */
+export function getOptimizationActions(params: YieldParams): string[] {
+  const actions: string[] = []
+
+  if (params.moisture_pct > 18) {
+    actions.push(
+      `Dry raw material to ≤14% moisture (now ${params.moisture_pct}%) before raising RPM.`,
+    )
+  }
+  if (params.machine_speed_rpm > 900) {
+    actions.push(
+      `Lower machine speed to ≤700 RPM (now ${params.machine_speed_rpm}) for safe throughput.`,
+    )
+  }
+  if (params.defect_rate_pct > 10) {
+    actions.push(
+      `Upstream sort / re-inspect — cut defect rate below 5% (now ${params.defect_rate_pct}%).`,
+    )
+  }
+  if (params.raw_material_grade <= 3) {
+    actions.push(
+      `Prefer Grade A/B intake or blend up material grade (now ${params.raw_material_grade}/5).`,
+    )
+  }
+  if (Math.abs(params.ambient_temp_celsius - 28) > 6) {
+    actions.push(
+      `Stabilize ambient near 28°C (now ${params.ambient_temp_celsius}°C).`,
+    )
+  }
+  if (params.processing_duration_min < 45) {
+    actions.push(
+      `Allow longer processing window (≥45 min) — rushed cycles cut usable yield.`,
+    )
+  }
+  if (actions.length === 0) {
+    actions.push(
+      'Line looks healthy — hold moisture low, grade high, defects low; raise batch size only after yield % is stable.',
+    )
+  }
+  return actions
+}
+
 export function formatParamValue(key: keyof YieldParams, value: number): string {
   switch (key) {
     case 'batch_weight_kg':

@@ -1,19 +1,10 @@
 const CROP_ICONS: Record<string, string> = {
-  rice: '🌾',
   maize: '🌽',
-  chickpea: '🫘',
-  cotton: '☁️',
-  pigeonpeas: '🫛',
-  mungbean: '🫘',
-  blackgram: '🫘',
-  lentil: '🫘',
-  banana: '🍌',
-  mango: '🥭',
-  grapes: '🍇',
-  watermelon: '🍉',
+  soybean: '🫘',
+  pepper: '🌶️',
+  tomato: '🍅',
+  potato: '🥔',
   apple: '🍎',
-  coffee: '☕',
-  jute: '🌿',
 }
 
 export function cropIcon(crop: string): string {

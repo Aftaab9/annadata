@@ -57,8 +57,14 @@ export default function Inspect() {
   const setGradeCard = useStore((s) => s.setGradeCard)
   const setYieldParams = useStore((s) => s.setYieldParams)
   const setDefectRateAutoFilled = useStore((s) => s.setDefectRateAutoFilled)
+  const storedCv = useStore((s) => s.cvResult)
+  const storedGrade = useStore((s) => s.gradeCard)
+  const lastInspectPreview = useStore((s) => s.lastInspectPreview)
+  const setLastInspectPreview = useStore((s) => s.setLastInspectPreview)
+  const lastInspectMode = useStore((s) => s.lastInspectMode)
+  const setLastInspectMode = useStore((s) => s.setLastInspectMode)
 
-  const [mode, setMode] = useState<InspectMode>('produce')
+  const [mode, setMode] = useState<InspectMode>(lastInspectMode ?? 'produce')
   const [produceLoading, setProduceLoading] = useState(true)
   const [phase, setPhase] = useState<InspectPhase>('live')
   const [modelLoading, setModelLoading] = useState(true)
@@ -71,6 +77,7 @@ export default function Inspect() {
   const [produceMock, setProduceMock] = useState(true)
   const [retrying, setRetrying] = useState(false)
   const lastSourceRef = useRef<HTMLCanvasElement | HTMLImageElement | null>(null)
+  const restoredRef = useRef(false)
   const [searchParams] = useSearchParams()
   const verifyId = searchParams.get('verify')
 
@@ -80,6 +87,24 @@ export default function Inspect() {
   })
 
   const modeCopy = INSPECT_MODE_COPY[mode]
+
+  // Restore last verdict when returning from Yield / Market / Prices
+  useEffect(() => {
+    if (restoredRef.current) return
+    restoredRef.current = true
+    if (!storedCv || !storedGrade) return
+    const thumb =
+      lastInspectPreview ??
+      inspectionHistory.find((r) => r.id === storedGrade.id)?.thumbnail ??
+      inspectionHistory[0]?.thumbnail ??
+      null
+    setResult(storedCv)
+    setLocalGradeCard(storedGrade)
+    setPreviewUrl(thumb)
+    setFrozenFrame(thumb)
+    setMode(storedGrade.sourceMode === 'leaf' ? 'leaf' : 'produce')
+    setPhase('result')
+  }, [storedCv, storedGrade, lastInspectPreview, inspectionHistory])
 
   useEffect(() => {
     const sync = () => {
@@ -159,12 +184,16 @@ export default function Inspect() {
           })
           setDefectRateAutoFilled(true)
           setPhase('result')
+          setLastInspectPreview(thumbnail)
+          setLastInspectMode('produce')
           addInspection({
             id: inspectionId,
             timestamp: Date.now(),
             crop: selectedCrop.label,
             result: asCv,
             thumbnail,
+            mode: 'produce',
+            gradeCard: card,
           })
         } else {
           const classification = await classifyImage(source)
@@ -189,12 +218,16 @@ export default function Inspect() {
           })
           setDefectRateAutoFilled(true)
           setPhase('result')
+          setLastInspectPreview(thumbnail)
+          setLastInspectMode('leaf')
           addInspection({
             id: inspectionId,
             timestamp: Date.now(),
             crop: selectedCrop.label,
             result: classification,
             thumbnail,
+            mode: 'leaf',
+            gradeCard: card,
           })
         }
 
@@ -216,6 +249,51 @@ export default function Inspect() {
       setCvResult,
       setDefectRateAutoFilled,
       setGradeCard,
+      setLastInspectMode,
+      setLastInspectPreview,
+      setYieldParams,
+    ],
+  )
+
+  const restoreInspection = useCallback(
+    (record: (typeof inspectionHistory)[number]) => {
+      const card = record.gradeCard
+      if (!card) {
+        // Older history entries without gradeCard — still show CV probs
+        setResult(record.result)
+        setCvResult(record.result)
+        setPreviewUrl(record.thumbnail ?? null)
+        setFrozenFrame(record.thumbnail ?? null)
+        setPhase('result')
+        return
+      }
+      setResult(record.result)
+      setCvResult(record.result)
+      setLocalGradeCard(card)
+      setGradeCard(card)
+      setPreviewUrl(record.thumbnail ?? null)
+      setFrozenFrame(record.thumbnail ?? null)
+      setLastInspectPreview(record.thumbnail ?? null)
+      const nextMode =
+        record.mode ?? (card.sourceMode === 'leaf' ? 'leaf' : 'produce')
+      setMode(nextMode)
+      setLastInspectMode(nextMode)
+      setYieldParams({
+        defect_rate_pct: card.defectRatePct,
+        raw_material_grade:
+          card.grade === 'A' ? 5 : card.grade === 'B' ? 3 : 1,
+      })
+      setDefectRateAutoFilled(true)
+      setPhase('result')
+      setError(null)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+    [
+      setCvResult,
+      setDefectRateAutoFilled,
+      setGradeCard,
+      setLastInspectMode,
+      setLastInspectPreview,
       setYieldParams,
     ],
   )
@@ -252,8 +330,10 @@ export default function Inspect() {
     setFrozenFrame(null)
     setError(null)
     setGradeCard(null)
+    setCvResult(null)
+    setLastInspectPreview(null)
     lastSourceRef.current = null
-  }, [setGradeCard])
+  }, [setCvResult, setGradeCard, setLastInspectPreview])
 
   const handleRetry = useCallback(async () => {
     const source = lastSourceRef.current
@@ -504,7 +584,11 @@ export default function Inspect() {
         </>
       )}
 
-      <HistoryStrip records={inspectionHistory} />
+      <HistoryStrip
+        records={inspectionHistory}
+        activeId={gradeCard?.id}
+        onSelect={restoreInspection}
+      />
     </div>
   )
 }

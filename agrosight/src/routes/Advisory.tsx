@@ -37,8 +37,8 @@ export default function Advisory() {
         Pre-harvest to post-harvest
       </SplitText>
       <p className="mt-2 text-sm text-muted">
-        What to plant → soil nutrients → expected yield → harvest weather. Yield engine
-        is trained; crop/fertilizer use lookups until you drop Colab ONNX files.
+        What to plant → soil nutrients → expected yield → harvest weather. Crop and
+        fertilizer models are RandomForest ONNX aligned to the 6 Annadata SKUs.
       </p>
       <div className="mt-5 flex gap-2 overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
         <img

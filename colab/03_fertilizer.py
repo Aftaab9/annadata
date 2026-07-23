@@ -73,7 +73,12 @@ print("Hold-out accuracy:", acc)
 print(classification_report(yte, pred, target_names=y_le.classes_))
 
 initial_type = [("float_input", FloatTensorType([None, 8]))]
-onnx_model = convert_sklearn(rf, initial_types=initial_type, target_opset=12)
+onnx_model = convert_sklearn(
+    rf,
+    initial_types=initial_type,
+    target_opset=12,
+    options={type(rf): {"zipmap": False}},
+)
 onnx_path = OUT / "fertilizer.onnx"
 with open(onnx_path, "wb") as f:
     f.write(onnx_model.SerializeToString())

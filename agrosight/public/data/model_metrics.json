@@ -1,6 +1,6 @@
 {
-  "updated": "2026-07-21",
-  "note": "Only metrics measured in Colab hold-out appear in Insights. Pending = wait for notebook export.",
+  "updated": "2026-07-23",
+  "note": "Only metrics measured in Colab / local hold-out appear in Insights.",
   "measured": [
     {
       "id": "pv_cv",
@@ -20,18 +20,18 @@
     },
     {
       "id": "crop_rec",
-      "value": 99.3,
+      "value": 96.7,
       "suffix": "%",
       "label": "Crop recommendation accuracy",
-      "how": "Kaggle Crop Recommendation hold-out · RandomForest → ONNX (crop_rec.onnx)",
+      "how": "Annadata 6-SKU RandomForest → ONNX (apple, maize, pepper, potato, soybean, tomato) · 96.74% hold-out",
       "status": "measured"
     },
     {
       "id": "fertilizer",
-      "value": 100.0,
+      "value": 84.4,
       "suffix": "%",
       "label": "Fertilizer classifier accuracy",
-      "how": "Kaggle Fertilizer Prediction hold-out · RandomForest → ONNX (fertilizer.onnx)",
+      "how": "Annadata 6-SKU RandomForest → ONNX (Urea/DAP/NPK blends) · 84.44% hold-out",
       "status": "measured"
     },
     {

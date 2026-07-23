@@ -71,10 +71,33 @@ export default defineConfig(({ mode }) => {
             options: {
               cacheName: 'agrosight-tflite-model',
               expiration: {
-                maxEntries: 1,
+                maxEntries: 3,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
               },
               cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /\/models\/.*\.onnx$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'agrosight-onnx-models',
+              expiration: {
+                maxEntries: 4,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /\/presentation\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'agrosight-presentation',
+              expiration: {
+                maxEntries: 40,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
             },
           },
           {

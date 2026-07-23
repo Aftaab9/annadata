@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Annadata — Research & Process Deck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;500;600&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a100e;
+        --bg-2: #0f1612;
+        --surface: #141c17;
+        --surface-2: #1a2420;
+        --text: #ecece4;
+        --muted: #9aaba0;
+        --dim: #5c6b62;
+        --accent: #3dd6c3;
+        --harvest: #e8b45c;
+        --healthy: #3ecf8e;
+        --danger: #e07060;
+        --border: rgba(236, 236, 228, 0.1);
+        --font-display: 'Syne', system-ui, sans-serif;
+        --font-ui: 'Sora', system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-ui);
+        overflow: hidden;
+      }
+
+      .deck {
+        height: 100%;
+        width: 100%;
+        position: relative;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        padding: clamp(1.4rem, 3.5vw, 2.75rem);
+        padding-bottom: 4.25rem;
+        opacity: 0;
+        background:
+          radial-gradient(ellipse 80% 50% at 100% 0%, rgba(61, 214, 195, 0.08), transparent),
+          radial-gradient(ellipse 60% 40% at 0% 100%, rgba(232, 180, 92, 0.06), transparent),
+          var(--bg);
+      }
+
+      .slide.active {
+        display: flex;
+        opacity: 1;
+        animation: in 0.35s ease;
+      }
+
+      @keyframes in {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 0.55rem;
+      }
+
+      h1 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(2rem, 5vw, 3.4rem);
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+      }
+
+      h2 {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: clamp(1.45rem, 3.2vw, 2.2rem);
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+      }
+
+      .sub {
+        color: var(--muted);
+        font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+        line-height: 1.45;
+        max-width: 40rem;
+        margin-top: 0.6rem;
+      }
+
+      .brand {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(2.8rem, 7vw, 4.6rem);
+        color: var(--accent);
+        letter-spacing: -0.03em;
+      }
+
+      .fill {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 0;
+      }
+
+      .grid-2 {
+        display: grid;
+        gap: 0.85rem;
+        grid-template-columns: 1fr;
+      }
+      .grid-3 {
+        display: grid;
+        gap: 0.75rem;
+        grid-template-columns: 1fr;
+      }
+      .grid-4 {
+        display: grid;
+        gap: 0.65rem;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      @media (min-width: 800px) {
+        .grid-2 {
+          grid-template-columns: 1fr 1fr;
+        }
+        .grid-3 {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .grid-4 {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        .grid-5 {
+          grid-template-columns: repeat(5, 1fr);
+        }
+      }
+
+      .grid-5 {
+        display: grid;
+        gap: 0.55rem;
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1rem 1.1rem;
+      }
+
+      .card.win {
+        border-color: rgba(61, 214, 195, 0.45);
+        background: rgba(61, 214, 195, 0.08);
+      }
+
+      .card h3 {
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        margin-bottom: 0.35rem;
+      }
+
+      .card p,
+      .card li {
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.4;
+      }
+
+      .card ul {
+        list-style: none;
+        margin-top: 0.45rem;
+      }
+
+      .card li + li {
+        margin-top: 0.25rem;
+      }
+
+      .tag {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+        border: 1px solid rgba(61, 214, 195, 0.35);
+        border-radius: 999px;
+        padding: 0.25rem 0.55rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .tag.gold {
+        color: var(--harvest);
+        border-color: rgba(232, 180, 92, 0.4);
+      }
+
+      .big {
+        font-family: var(--font-mono);
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        font-weight: 600;
+        color: var(--accent);
+        line-height: 1;
+      }
+
+      .big.gold {
+        color: var(--harvest);
+      }
+
+      .label {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--dim);
+        margin-top: 0.35rem;
+      }
+
+      /* bars */
+      .bars {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        margin-top: 0.5rem;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 8.5rem 1fr 3.5rem;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .bar-row span:first-child {
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .bar-track {
+        height: 12px;
+        background: var(--surface-2);
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+
+      .bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: var(--dim);
+      }
+
+      .bar-fill.win {
+        background: linear-gradient(90deg, #2bb8a8, var(--accent));
+      }
+
+      .bar-row em {
+        font-style: normal;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        text-align: right;
+      }
+
+      /* steps */
+      .steps {
+        display: grid;
+        gap: 0.55rem;
+        counter-reset: step;
+      }
+
+      @media (min-width: 900px) {
+        .steps.horizontal {
+          grid-template-columns: repeat(5, 1fr);
+        }
+      }
+
+      .step {
+        position: relative;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 0.95rem 1rem 0.95rem 1rem;
+      }
+
+      .step::before {
+        counter-increment: step;
+        content: counter(step);
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--accent);
+        display: block;
+        margin-bottom: 0.4rem;
+        letter-spacing: 0.1em;
+      }
+
+      .step strong {
+        display: block;
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .step span {
+        font-size: 0.8rem;
+        color: var(--muted);
+        line-height: 1.35;
+      }
+
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.45rem;
+        margin-top: 0.75rem;
+      }
+
+      .flow .node {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.55rem 0.8rem;
+        font-size: 0.82rem;
+      }
+
+      .flow .node.hi {
+        border-color: rgba(61, 214, 195, 0.45);
+        color: var(--accent);
+      }
+
+      .flow .arrow {
+        color: var(--dim);
+        font-family: var(--font-mono);
+      }
+
+      .why {
+        margin-top: 0.85rem;
+        padding: 0.85rem 1rem;
+        border-left: 3px solid var(--accent);
+        background: rgba(61, 214, 195, 0.06);
+        border-radius: 0 10px 10px 0;
+        font-size: 0.92rem;
+        color: var(--text);
+        line-height: 1.4;
+      }
+
+      .why b {
+        color: var(--accent);
+      }
+
+      .chart {
+        width: 100%;
+        max-height: min(42vh, 360px);
+        object-fit: contain;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #0d1210;
+      }
+
+      .split {
+        display: grid;
+        gap: 1rem;
+      }
+
+      @media (min-width: 900px) {
+        .split {
+          grid-template-columns: 1.1fr 0.9fr;
+          align-items: center;
+        }
+      }
+
+      .vs {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 0.75rem;
+        align-items: stretch;
+      }
+
+      .vs .mid {
+        align-self: center;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--harvest);
+        letter-spacing: 0.15em;
+      }
+
+      .chrome {
+        position: fixed;
+        inset-inline: 0;
+        bottom: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.75rem clamp(1rem, 3vw, 2rem);
+        background: linear-gradient(to top, rgba(10, 16, 14, 0.98), transparent);
+        pointer-events: none;
+      }
+
+      .chrome > * {
+        pointer-events: auto;
+      }
+
+      .dots {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        justify-content: center;
+        max-width: 55vw;
+      }
+
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        border: 0;
+        background: var(--dim);
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .dot.on {
+        background: var(--accent);
+        box-shadow: 0 0 10px rgba(61, 214, 195, 0.5);
+      }
+
+      .nav button {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.5rem 0.85rem;
+        cursor: pointer;
+      }
+
+      .nav button:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .hint {
+        font-family: var(--font-mono);
+        font-size: 0.58rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+
+      .progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 2px;
+        background: var(--accent);
+        z-index: 30;
+        transition: width 0.25s ease;
+      }
+
+      .team {
+        margin-top: 1rem;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .team b {
+        color: var(--text);
+      }
+
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 0.75rem;
+      }
+
+      .pill {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.35rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+
+      .pill.on {
+        color: var(--accent);
+        border-color: rgba(61, 214, 195, 0.4);
+        background: rgba(61, 214, 195, 0.08);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .slide.active {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress" id="progress"></div>
+    <div class="deck" id="deck">
+      <!-- 0 -->
+      <section class="slide active">
+        <p class="eyebrow">SP Jain MAIB · Group 3 · AI in Operations</p>
+        <div class="fill">
+          <p class="brand">Annadata</p>
+          <h1 style="margin-top: 0.4rem">Models · Training · Process</h1>
+          <p class="sub">
+            What we trained, how we compared models, and how the farmer
+            prototype connects inspection → price → yield → market.
+          </p>
+          <p class="team"><b>Aftaab</b> · <b>Isaac</b> · <b>Ishaan</b></p>
+        </div>
+      </section>
+
+      <!-- 1 -->
+      <section class="slide">
+        <p class="eyebrow">Agenda</p>
+        <h2>What this deck covers</h2>
+        <div class="fill">
+          <div class="grid-3">
+            <div class="card">
+              <span class="tag">01</span>
+              <h3>Models &amp; training</h3>
+              <p>Vision + tabular + forecast — datasets, splits, bake-offs</p>
+            </div>
+            <div class="card">
+              <span class="tag">02</span>
+              <h3>Why this winner</h3>
+              <p>Hold-out numbers — accuracy / F1 / MAPE</p>
+            </div>
+            <div class="card">
+              <span class="tag">03</span>
+              <h3>Prototype process</h3>
+              <p>Inspect → mandi price → yield sim → market</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section class="slide">
+        <p class="eyebrow">Architecture</p>
+        <h2>One product · six model jobs</h2>
+        <div class="fill">
+          <div class="grid-3">
+            <div class="card">
+              <span class="tag">Vision</span>
+              <h3>Leaf Health</h3>
+              <p>PlantVillage · disease while growing</p>
+              <p class="big" style="margin-top: 0.7rem">97.4%</p>
+              <p class="label">EfficientNetB0</p>
+            </div>
+            <div class="card win">
+              <span class="tag">Vision</span>
+              <h3>Produce Quality</h3>
+              <p>Fresh vs rotten → Grade A/B/C</p>
+              <p class="big" style="margin-top: 0.7rem">97.0%</p>
+              <p class="label">ResNet50</p>
+            </div>
+            <div class="card">
+              <span class="tag">Tabular</span>
+              <h3>Crop · Fertilizer</h3>
+              <p>RandomForest → ONNX in browser</p>
+              <p class="big" style="margin-top: 0.7rem">99.3%</p>
+              <p class="label">Crop hold-out · Fert 100%</p>
+            </div>
+            <div class="card">
+              <span class="tag">Forecast</span>
+              <h3>Price series</h3>
+              <p>GradientBoostingRegressor</p>
+              <p class="big gold" style="margin-top: 0.7rem">3.4%</p>
+              <p class="label">MAPE · lower is better</p>
+            </div>
+            <div class="card">
+              <span class="tag">Process</span>
+              <h3>Yield engine</h3>
+              <p>Moisture · grade · defects · RPM…</p>
+              <p class="big gold" style="margin-top: 0.7rem">3.52%</p>
+              <p class="label">MAPE hold-out</p>
+            </div>
+            <div class="card">
+              <span class="tag">Live data</span>
+              <h3>Agmarknet</h3>
+              <p>data.gov.in mandi modal · free API</p>
+              <p class="big" style="margin-top: 0.7rem; font-size: 1.4rem">
+                A+10% / B / C−20%
+              </p>
+              <p class="label">Fair price rule</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="slide">
+        <p class="eyebrow">Critical design rule</p>
+        <h2>Leaf ≠ Fruit</h2>
+        <div class="fill">
+          <div class="vs">
+            <div class="card">
+              <span class="tag">Leaf Health</span>
+              <h3>While the plant grows</h3>
+              <ul>
+                <li>Dataset: PlantVillage leaves</li>
+                <li>Classes: Healthy · Surface · Blight</li>
+                <li>Job: treatment / field action</li>
+              </ul>
+            </div>
+            <div class="mid">≠</div>
+            <div class="card win">
+              <span class="tag gold">Produce Quality</span>
+              <h3>After harvest</h3>
+              <ul>
+                <li>Dataset: fruit / veg images</li>
+                <li>Fresh → Rotten → Grade A/B/C</li>
+                <li>Job: mandi price &amp; market list</li>
+              </ul>
+            </div>
+          </div>
+          <p class="why">
+            <b>Why two models?</b> A diseased leaf does not mean the harvested
+            fruit is Grade C. Mixing them would be dishonest grading.
+          </p>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="slide">
+        <p class="eyebrow">Training · Leaf Health</p>
+        <h2>How we trained leaf disease CV</h2>
+        <div class="fill">
+          <div class="grid-2">
+            <div class="card">
+              <span class="tag">Data</span>
+              <h3>PlantVillage · 6 crop SKUs</h3>
+              <ul>
+                <li>Maize · Soybean · Pepper · Tomato · Potato · Apple</li>
+                <li>Mapped to 3 ops classes</li>
+                <li>Pilot first: Makerere beans <b style="color: var(--text)">94.2%</b></li>
+              </ul>
+            </div>
+            <div class="card">
+              <span class="tag">Protocol</span>
+              <h3>Fair bake-off</h3>
+              <ul>
+                <li>Same train / validation split</li>
+                <li>Same epoch budget for every backbone</li>
+                <li>Score = accuracy + F1 composite</li>
+                <li>Export winner → <b style="color: var(--text)">TFLite</b> on-device</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pill-row">
+            <span class="pill">MobileNetV2</span>
+            <span class="pill on">EfficientNetB0 ✓</span>
+            <span class="pill">ResNet50</span>
+            <span class="pill">DenseNet121</span>
+            <span class="pill">Custom CNN</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section class="slide">
+        <p class="eyebrow">Leaf · Why this model</p>
+        <h2>Winner: EfficientNetB0 — 97.4%</h2>
+        <div class="fill">
+          <div class="grid-2">
+            <div class="card win">
+              <span class="tag">Selected</span>
+              <h3>EfficientNetB0</h3>
+              <p class="big" style="margin-top: 0.6rem">97.4%</p>
+              <p class="label">Hold-out accuracy</p>
+              <p style="margin-top: 0.75rem">
+                Best composite on PlantVillage multi-SKU setup for our line.
+              </p>
+            </div>
+            <div class="card">
+              <span class="tag gold">Why we chose it</span>
+              <ul>
+                <li>Highest accuracy + F1 among 5 architectures</li>
+                <li>Strong accuracy / size balance for phones</li>
+                <li>Same split as losers — not cherry-picked data</li>
+                <li>Ships as TFLite in the farmer app</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section class="slide">
+        <p class="eyebrow">Training · Produce Quality</p>
+        <h2>Harvest grading bake-off</h2>
+        <div class="fill">
+          <div class="split">
+            <div>
+              <div class="bars">
+                <div class="bar-row">
+                  <span>ResNet50</span>
+                  <div class="bar-track">
+                    <div class="bar-fill win" style="width: 97%"></div>
+                  </div>
+                  <em>97.0%</em>
+                </div>
+                <div class="bar-row">
+                  <span>MobileNetV2</span>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 92%"></div>
+                  </div>
+                  <em>92.0%</em>
+                </div>
+                <div class="bar-row">
+                  <span>EfficientNetB0</span>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 85%"></div>
+                  </div>
+                  <em>85.3%</em>
+                </div>
+              </div>
+              <p class="why">
+                <b>Split:</b> 80% train · 20% validation · transfer learning
+                (freeze → fine-tune) · TensorFlow 2.20
+              </p>
+            </div>
+            <div class="card win">
+              <span class="tag">Winner</span>
+              <h3>ResNet50</h3>
+              <p>Acc <b style="color: var(--text)">96.96%</b></p>
+              <p>F1 <b style="color: var(--text)">97.12%</b></p>
+              <p style="margin-top: 0.7rem">
+                EfficientNet won on leaves — not on produce. Task-specific
+                bake-off → we ship ResNet50 TFLite for Grade A/B/C.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 -->
+      <section class="slide">
+        <p class="eyebrow">Evidence</p>
+        <h2>Colab model comparison chart</h2>
+        <div class="fill" style="justify-content: flex-start">
+          <img
+            class="chart"
+            src="../agrosight/public/assets/11_produce_model_comparison.png"
+            alt="Produce model comparison chart from Colab"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
+          />
+          <div class="card" style="display: none; margin-top: 1rem">
+            <p>Chart file missing locally — numbers above are from Colab hold-out export.</p>
+          </div>
+          <p class="label" style="margin-top: 0.6rem">
+            Measured hold-out only · no invented marketing metrics
+          </p>
+        </div>
+      </section>
+
+      <!-- 8 -->
+      <section class="slide">
+        <p class="eyebrow">Produce · Why ResNet50</p>
+        <h2>Clear decision rule</h2>
+        <div class="fill">
+          <div class="grid-3">
+            <div class="card">
+              <h3>+4.9 pts vs MobileNet</h3>
+              <p>Accuracy gap on the same produce hold-out</p>
+            </div>
+            <div class="card">
+              <h3>Best F1 · 97.12%</h3>
+              <p>Fewer costly Fresh ↔ Rotten confusions</p>
+            </div>
+            <div class="card">
+              <h3>Deploy path</h3>
+              <p>Binary sigmoid head → TFLite → Grade A/B/C map</p>
+            </div>
+          </div>
+          <p class="why">
+            <b>We did not pick the “famous” model by default.</b> Leaf →
+            EfficientNet. Produce → ResNet50. Whichever won the hold-out.
+          </p>
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section class="slide">
+        <p class="eyebrow">Tabular models</p>
+        <h2>Crop &amp; fertilizer — RandomForest</h2>
+        <div class="fill">
+          <div class="grid-2">
+            <div class="card">
+              <span class="tag">Crop recommendation</span>
+              <p class="big">99.3%</p>
+              <p class="label">Hold-out accuracy</p>
+              <ul style="margin-top: 0.7rem">
+                <li>Kaggle Crop Recommendation</li>
+                <li>Features: N · P · K · pH · rain · temp…</li>
+                <li>Split: 80/20 stratified · seed 42</li>
+                <li>RF 200 trees → <b style="color: var(--text)">ONNX</b></li>
+              </ul>
+            </div>
+            <div class="card">
+              <span class="tag">Fertilizer</span>
+              <p class="big">100%</p>
+              <p class="label">Hold-out accuracy</p>
+              <ul style="margin-top: 0.7rem">
+                <li>Kaggle Fertilizer Prediction</li>
+                <li>Same RF → ONNX pattern</li>
+                <li>Runs in-browser (onnxruntime-web)</li>
+                <li>High tabular score ≠ skip HITL on vision</li>
+              </ul>
+            </div>
+          </div>
+          <p class="why">
+            <b>Why RandomForest?</b> Strong on small structured agri tables ·
+            easy ONNX export · no GPU needed on the farmer phone.
+          </p>
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section class="slide">
+        <p class="eyebrow">Forecast &amp; process</p>
+        <h2>Price MAPE · Yield MAPE</h2>
+        <div class="fill">
+          <div class="grid-2">
+            <div class="card">
+              <span class="tag gold">Price forecast</span>
+              <p class="big gold">3.4%</p>
+              <p class="label">MAPE · GradientBoostingRegressor</p>
+              <p style="margin-top: 0.65rem">
+                Commodity series for demo crops → JSON for Prices UI.
+              </p>
+            </div>
+            <div class="card">
+              <span class="tag gold">Yield model</span>
+              <p class="big gold">3.52%</p>
+              <p class="label">MAPE · linear / tree regressor</p>
+              <p style="margin-top: 0.65rem">
+                Inputs: moisture · grade · defects · temp · duration · RPM ·
+                batch weight.
+              </p>
+            </div>
+          </div>
+          <p class="why">
+            <b>MAPE:</b> average % error on hold-out — lower is better. Live
+            mandi modal still comes from Agmarknet (next slides).
+          </p>
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section class="slide">
+        <p class="eyebrow">KPI strip</p>
+        <h2>Only Colab-measured numbers</h2>
+        <div class="fill">
+          <div class="grid-4">
+            <div class="card"><p class="big">97.4%</p><p class="label">Leaf</p></div>
+            <div class="card win"><p class="big">97.0%</p><p class="label">Produce</p></div>
+            <div class="card"><p class="big">99.3%</p><p class="label">Crop RF</p></div>
+            <div class="card"><p class="big gold">3.4%</p><p class="label">Price MAPE</p></div>
+            <div class="card"><p class="big">100%</p><p class="label">Fert RF</p></div>
+            <div class="card"><p class="big gold">3.52%</p><p class="label">Yield MAPE</p></div>
+            <div class="card"><p class="big">94.2%</p><p class="label">Beans pilot</p></div>
+            <div class="card"><p class="big">5</p><p class="label">CV architectures</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section class="slide">
+        <p class="eyebrow">Prototype process</p>
+        <h2>Farmer journey — 5 steps</h2>
+        <div class="fill">
+          <div class="steps horizontal">
+            <div class="step">
+              <strong>Inspect</strong>
+              <span>Leaf or Produce · confidence · Grade Card</span>
+            </div>
+            <div class="step">
+              <strong>Price</strong>
+              <span>Agmarknet modal ± grade premium</span>
+            </div>
+            <div class="step">
+              <strong>Yield</strong>
+              <span>Simulate scenarios · clear bottlenecks</span>
+            </div>
+            <div class="step">
+              <strong>Market</strong>
+              <span>List / buy with grade · Supabase</span>
+            </div>
+            <div class="step">
+              <strong>Insights</strong>
+              <span>Defect · yield trends · KPIs</span>
+            </div>
+          </div>
+          <div class="flow">
+            <span class="node">Camera</span>
+            <span class="arrow">→</span>
+            <span class="node hi">On-device model</span>
+            <span class="arrow">→</span>
+            <span class="node">Grade A/B/C</span>
+            <span class="arrow">→</span>
+            <span class="node hi">Fair ₹</span>
+            <span class="arrow">→</span>
+            <span class="node">Sell / optimize</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 -->
+      <section class="slide">
+        <p class="eyebrow">Price connect</p>
+        <h2>How fair price is built</h2>
+        <div class="fill">
+          <div class="steps">
+            <div class="step">
+              <strong>1 · Produce Inspect</strong>
+              <span>Fresh / Borderline / Rotten → Grade A · B · C + defect %</span>
+            </div>
+            <div class="step">
+              <strong>2 · Fetch mandi modal</strong>
+              <span>data.gov.in Agmarknet API (free) · state + commodity · snapshot fallback if offline</span>
+            </div>
+            <div class="step">
+              <strong>3 · Apply grade rule</strong>
+              <span>A = modal × 1.10 · B = modal · C = modal × 0.80</span>
+            </div>
+            <div class="step">
+              <strong>4 · Use everywhere</strong>
+              <span>Prices screen · Market list price · buyer “fair price” badge</span>
+            </div>
+          </div>
+          <p class="why">
+            <b>Example:</b> Modal ₹1,733 → Grade A ≈ ₹1,906 · Grade C ≈ ₹1,386
+          </p>
+        </div>
+      </section>
+
+      <!-- 14 -->
+      <section class="slide">
+        <p class="eyebrow">Production simulation</p>
+        <h2>Bottlenecks → optimize throughput</h2>
+        <div class="fill">
+          <div class="grid-3">
+            <div class="card">
+              <span class="tag">Scenarios</span>
+              <h3>Stressed · Baseline · Optimal</h3>
+              <p>Same yield engine · different operating points</p>
+            </div>
+            <div class="card">
+              <span class="tag gold">Detect</span>
+              <h3>Bottleneck flags</h3>
+              <p>Wet + high RPM · high defects · low grade · bad temp</p>
+            </div>
+            <div class="card win">
+              <span class="tag">Optimize</span>
+              <h3>Throughput kg/h</h3>
+              <p>Playbook actions + “Optimize line” preset</p>
+            </div>
+          </div>
+          <div class="flow" style="margin-top: 1rem">
+            <span class="node">CV defect + grade</span>
+            <span class="arrow">→</span>
+            <span class="node hi">Yield params</span>
+            <span class="arrow">→</span>
+            <span class="node">Yield % · kg/h</span>
+            <span class="arrow">→</span>
+            <span class="node hi">Clear bottleneck</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15 -->
+      <section class="slide">
+        <p class="eyebrow">Ethics · employment</p>
+        <h2>Assist workers · don’t replace them</h2>
+        <div class="fill">
+          <div class="grid-2">
+            <div class="card">
+              <span class="tag gold">HITL gate</span>
+              <h3>&lt; 70% confidence</h3>
+              <p>Human path — market listing blocked until supervisor reviews</p>
+            </div>
+            <div class="card">
+              <span class="tag">Skill elevation</span>
+              <h3>Sorter → validator</h3>
+              <p>AI drafts Grade Card · people negotiate &amp; decide</p>
+            </div>
+          </div>
+          <p class="why">
+            <b>Displacement risk is real.</b> Our answer: cut waste (₹), keep
+            humans on reject/accept, shift skill to exceptions + selling.
+          </p>
+        </div>
+      </section>
+
+      <!-- 16 -->
+      <section class="slide">
+        <p class="eyebrow">Next</p>
+        <div class="fill">
+          <h1>Live prototype</h1>
+          <p class="sub">
+            Farmer app — inspect, price, yield, market, insights, ethics.
+          </p>
+          <div class="card" style="margin-top: 1.25rem; max-width: 28rem">
+            <p class="label">Open</p>
+            <p style="margin-top: 0.35rem; font-family: var(--font-mono); color: var(--accent)">
+              localhost:5173
+            </p>
+            <p style="margin-top: 0.35rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted)">
+              or annadata-lake.vercel.app
+            </p>
+          </div>
+          <p class="team" style="margin-top: 1.5rem">
+            Problem pitch (optional): <b>index.html</b> · This deck:
+            <b>deck.html</b>
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <div class="chrome">
+      <p class="hint" id="page">1 / 17</p>
+      <div class="dots" id="dots"></div>
+      <div class="nav">
+        <button type="button" id="prev">Prev</button>
+        <button type="button" id="next">Next</button>
+      </div>
+    </div>
+
+    <script>
+      const slides = [...document.querySelectorAll('.slide')]
+      const dotsEl = document.getElementById('dots')
+      const pageEl = document.getElementById('page')
+      const progress = document.getElementById('progress')
+      let i = 0
+
+      slides.forEach((_, idx) => {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.className = 'dot' + (idx === 0 ? ' on' : '')
+        b.setAttribute('aria-label', 'Slide ' + (idx + 1))
+        b.addEventListener('click', () => go(idx))
+        dotsEl.appendChild(b)
+      })
+
+      function go(n) {
+        i = (n + slides.length) % slides.length
+        slides.forEach((s, idx) => s.classList.toggle('active', idx === i))
+        ;[...dotsEl.children].forEach((d, idx) =>
+          d.classList.toggle('on', idx === i),
+        )
+        pageEl.textContent = i + 1 + ' / ' + slides.length
+        progress.style.width = ((i + 1) / slides.length) * 100 + '%'
+      }
+
+      document.getElementById('prev').onclick = () => go(i - 1)
+      document.getElementById('next').onclick = () => go(i + 1)
+
+      window.addEventListener('keydown', (e) => {
+        if (['ArrowRight', ' ', 'PageDown', 'Enter'].includes(e.key)) {
+          e.preventDefault()
+          go(i + 1)
+        }
+        if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) {
+          e.preventDefault()
+          go(i - 1)
+        }
+        if (e.key === 'Home') go(0)
+        if (e.key === 'End') go(slides.length - 1)
+      })
+
+      document.getElementById('deck').addEventListener('click', (e) => {
+        if (e.target.closest('button')) return
+        go(e.clientX >= window.innerWidth / 2 ? i + 1 : i - 1)
+      })
+
+      go(0)
+    </script>
+  </body>
+</html>

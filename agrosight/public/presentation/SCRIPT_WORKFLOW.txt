@@ -1,0 +1,173 @@
+================================================================================
+ANNADATA / AGROSIGHT — WORKFLOW DEMO SCRIPT
+SP Jain MAIB · Group 3 · Aftaab · Isaac · Ishaan
+Open: presentation/workflow.html  ·  Keys: ← → · Space · click halves
+Live: https://annadata-lake.vercel.app  ·  Local: http://localhost:5173
+Target: ~10–12 minutes + Q&A
+================================================================================
+
+--- SLIDE 1 · Title ---
+
+Good morning. We are Group 3 — Aftaab, Isaac, and Ishaan — presenting Annadata,
+also known as AgroSight. This deck is a workflow walkthrough of our live farmer
+prototype: how a rural processor moves from a phone photo to a grade, a fair
+mandi price, a yield simulation, and a market listing — with humans still in
+the loop. The live app is at annadata-lake.vercel.app; we also run it locally
+on port 5173 for demos.
+
+--- SLIDE 2 · Agenda ---
+
+Here is the path we will follow. We start with why we built two separate
+computer-vision models, then walk screen-by-screen through Inspect, Yield,
+Prices, Market, Advisory, Insights, and Ethics. Every process step you see
+uses a real screenshot from the app — not a mockup.
+
+--- SLIDE 3 · Why two CV jobs ---
+
+Leaf health and produce quality are not the same task. On the left, Leaf mode
+looks at on-plant disease — Healthy, Surface Defect, or Blight/Mold — trained
+on PlantVillage with EfficientNetB0 at 97.4% hold-out accuracy. On the right,
+Produce mode judges post-harvest spoilage — Fresh, Borderline, or Spoiled —
+where ResNet50 won our bake-off at roughly 97% accuracy and 97.1% F1. One
+Inspect screen, two purpose-built models.
+
+--- SLIDE 4 · Landing ---
+
+This is the landing hub. From here the operator picks Inspect, Yield, Prices,
+Market, Advisory, Insights, or Ethics. The design goal is one PWA that a small
+rural line can run on a phone or laptop without switching tools.
+
+--- SLIDE 5 · Leaf upload ---
+
+In Leaf mode the user uploads or captures a leaf photo and runs inference
+in-browser via TFLite. No server round-trip — important for flaky rural
+connectivity. The model compares five architectures; EfficientNetB0 is the
+winner at 97.4%.
+
+--- SLIDE 6 · Leaf outcome ---
+
+The model returns one of three classes. HEALTHY means no actionable disease.
+SURFACE_DEFECT is early or cosmetic stress — monitor and adjust handling.
+BLIGHT_MOLD is active disease — the app shows treatment advice and flags higher
+yield risk. You can see the result card and treatment tips in this screenshot.
+
+--- SLIDE 7 · Leaf → Yield ---
+
+The leaf result does not stop at advice. A disease classification maps to a
+defect rate that auto-fills the Yield simulator — shown here — so the operator
+does not re-type numbers. That is how field inspection connects to line
+throughput planning.
+
+--- SLIDE 8 · Produce upload ---
+
+Switch to Produce mode for post-harvest batches. Same Inspect UX, different
+model: ResNet50 beat MobileNetV2 and EfficientNetB0 on our hold-out set at
+about 97% accuracy and 97.1% F1.
+
+--- SLIDE 9 · Fresh outcome ---
+
+A Fresh classification maps to Grade A or B. The fair-price rule applies a
+premium over the mandi baseline. Grade and defect percentage also flow forward
+to Yield and Market automatically.
+
+--- SLIDE 10 · Spoiled outcome ---
+
+Spoiled or borderline quality maps to Grade C with a discount — honest grading
+so buyers trust the Grade Card. If confidence drops below 70%, HITL kicks in:
+the supervisor must confirm before listing on the market.
+
+--- SLIDE 11 · Next actions ---
+
+After produce inspect, four one-click paths open: Price for mandi fair ₹,
+Yield to simulate the line, Market to list with a Grade Card, or Assistant for
+crop and fertilizer advice. No copy-paste between modules.
+
+--- SLIDE 12 · Yield simulator ---
+
+The Yield page takes seven process parameters — moisture, RPM, temperature,
+grade, defect rate, batch size, line speed — and predicts yield percentage and
+throughput in kg per hour. CV auto-fills defect and grade from Inspect. Our
+hold-out yield MAPE is 3.52%.
+
+--- SLIDE 13 · Optimal scenario ---
+
+We run Stressed, Baseline, and Optimal scenarios. One click on Optimal applies
+a playbook that flags the bottleneck and lifts throughput. Our beans pilot
+validated at 94.2% against line expectations.
+
+--- SLIDE 14 · Mandi prices ---
+
+The Prices screen links live mandi reference data to the same Grade A/B/C
+language from Inspect. Premium or discount is applied consistently. Price
+forecast MAPE on hold-out is 3.4%.
+
+--- SLIDE 15 · Market ---
+
+On Market, the seller lists a lot with a Grade Card — grade, confidence, fair
+price badge — so buyers see machine-assisted quality, not a vague description.
+This closes the loop from photo to trusted listing.
+
+--- SLIDE 16 · Crop advisory ---
+
+Advisory takes soil N, P, K, pH, rainfall, and temperature and recommends the
+best crop among six Annadata SKUs. The random forest exports to ONNX for
+in-browser inference at 96.74% hold-out accuracy.
+
+--- SLIDE 17 · Fertilizer advisory ---
+
+Given crop and soil inputs, the fertilizer model suggests a mix for the same
+six SKUs. We report 84.44% hold-out accuracy honestly — it is advisory guidance,
+not a legal prescription.
+
+--- SLIDE 18 · Insights KPIs ---
+
+The Insights dashboard summarizes session KPIs alongside our measured hold-out
+numbers: 97.4% leaf, ~97% produce, 96.74% crop, 84.44% fertilizer, 3.52% yield
+MAPE, 3.4% price MAPE. These are the same figures in our Colab training runs.
+
+--- SLIDE 19 · Insights charts ---
+
+Insights also embeds training charts — model comparisons and confusion matrices
+— so faculty and operators can audit how each model was selected, not just see
+a headline accuracy.
+
+--- SLIDE 20 · Leaf training charts ---
+
+Here is the PlantVillage bake-off: five architectures compared, EfficientNetB0
+on top at 97.4%, with the hold-out confusion matrix beside it. SKU-level
+breakdown is in our charts folder as well.
+
+--- SLIDE 21 · Produce training charts ---
+
+Produce quality shows the same rigour: ResNet50 wins over MobileNetV2 and
+EfficientNetB0, with the confusion matrix confirming strong Fresh vs Spoiled
+separation at 97.1% F1.
+
+--- SLIDE 22 · Yield & tabular training ---
+
+Yield regression model comparison and SHAP feature importance explain which
+process inputs drive throughput. Below that, tabular model comparison and
+confusion matrix cover crop and fertilizer RF models — 96.74% and 84.44%
+respectively.
+
+--- SLIDE 23 · Ethics ---
+
+Ethics is not an appendix. When confidence is below 70%, the app blocks market
+listing until a supervisor reviews. We frame the business case as less waste in
+rupees, not payroll cuts — sorters become validators and negotiators, not
+replaced workers.
+
+--- SLIDE 24 · End-to-end summary ---
+
+Pulling it together: inspect leaf for disease advice, inspect produce for grade,
+link grade to mandi price, simulate yield with CV-filled defects, list on market
+with a Grade Card, get crop and fertilizer advice, and always keep HITL in the
+loop. Beans pilot at 94.2% validates the yield line on real data.
+
+--- SLIDE 25 · Close / Q&A ---
+
+That is Annadata — inspect honestly, price fairly, optimize the line, keep
+humans in the loop. We are happy to take questions or do a live demo at
+annadata-lake.vercel.app. Thank you.
+
+================================================================================

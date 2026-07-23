@@ -10,7 +10,7 @@ import {
   predictYieldSync,
   type YieldPrediction,
 } from '@/lib/yieldEngine'
-import { getBottleneckReasons } from '@/lib/yieldHealth'
+import { getBottleneckReasons, getOptimizationActions } from '@/lib/yieldHealth'
 import {
   YIELD_PARAM_RANGES,
   YIELD_SCENARIOS,
@@ -111,6 +111,19 @@ export default function Yield() {
   }
 
   const bottleneckReasons = getBottleneckReasons(yieldParams)
+  const optimizeActions = getOptimizationActions(yieldParams)
+
+  const scenarioBoard = YIELD_SCENARIOS.map((s) => {
+    const p = predictYieldSync(s.params)
+    return {
+      id: s.id,
+      label: s.label,
+      yield_pct: p.yield_pct,
+      throughput: p.throughput_kg_per_hr,
+      efficiency: p.efficiency_score,
+      bottleneck: p.bottleneck,
+    }
+  })
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 pb-28">
@@ -221,6 +234,83 @@ export default function Yield() {
           <BottleneckAlert reasons={bottleneckReasons} />
         </div>
       )}
+
+      {/* Scenario comparison — brief: simulate + optimize throughput */}
+      <div className="mt-8">
+        <p className="section-label mb-3">Scenario comparison</p>
+        <p className="mb-3 text-sm text-muted">
+          Same yield engine, three operating points — find the bottleneck, then
+          optimize throughput.
+        </p>
+        <div className="overflow-x-auto rounded-[var(--radius)] border border-[var(--border)]">
+          <table className="w-full min-w-[32rem] text-left text-sm">
+            <thead className="border-b border-[var(--border)] bg-[var(--surface-2)] font-mono text-[10px] uppercase tracking-widest text-muted">
+              <tr>
+                <th className="px-3 py-2.5 font-medium">Scenario</th>
+                <th className="px-3 py-2.5 font-medium">Yield %</th>
+                <th className="px-3 py-2.5 font-medium">Throughput</th>
+                <th className="px-3 py-2.5 font-medium">Efficiency</th>
+                <th className="px-3 py-2.5 font-medium">Bottleneck</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scenarioBoard.map((row) => (
+                <tr
+                  key={row.id}
+                  className={cn(
+                    'border-b border-[var(--border)] last:border-0',
+                    activeScenario === row.id && 'bg-cyan/5',
+                  )}
+                >
+                  <td className="px-3 py-2.5">
+                    <button
+                      type="button"
+                      className="font-medium text-text hover:text-cyan"
+                      onClick={() => applyScenario(row.id)}
+                    >
+                      {row.label}
+                    </button>
+                  </td>
+                  <td className="px-3 py-2.5 font-mono tabular-nums text-text">
+                    {row.yield_pct}%
+                  </td>
+                  <td className="px-3 py-2.5 font-mono tabular-nums text-text">
+                    {row.throughput} kg/h
+                  </td>
+                  <td className="px-3 py-2.5 font-mono tabular-nums text-muted">
+                    {row.efficiency}
+                  </td>
+                  <td className="px-3 py-2.5 font-mono text-[11px]">
+                    {row.bottleneck ? (
+                      <span className="text-warning">Yes</span>
+                    ) : (
+                      <span className="text-healthy">Clear</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-[var(--radius)] border border-healthy/25 bg-healthy/5 p-4">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-healthy">
+          Optimize throughput — playbook
+        </p>
+        <ul className="mt-2 space-y-1.5 text-sm text-muted">
+          {optimizeActions.map((a) => (
+            <li key={a} className="flex gap-2">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-healthy" />
+              {a}
+            </li>
+          ))}
+        </ul>
+        <Button className="mt-4" size="sm" onClick={handleOptimize}>
+          <Sparkles className="h-4 w-4" aria-hidden />
+          Apply optimal line
+        </Button>
+      </div>
 
       <div className="mt-10">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-2">

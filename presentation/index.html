@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Annadata — The Problem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a100e;
+        --bg-2: #0f1612;
+        --text: #ecece4;
+        --muted: #9aaba0;
+        --dim: #5c6b62;
+        --accent: #3dd6c3;
+        --harvest: #e8b45c;
+        --danger: #e07060;
+        --font-display: 'Syne', system-ui, sans-serif;
+        --font-ui: 'Sora', system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-ui);
+        overflow: hidden;
+      }
+
+      .deck {
+        position: relative;
+        height: 100%;
+        width: 100%;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: clamp(1.5rem, 4vw, 3.5rem);
+        padding-bottom: clamp(4rem, 8vh, 5.5rem);
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 0.45s ease, transform 0.45s ease;
+        background: var(--bg);
+      }
+
+      .slide.active {
+        display: flex;
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .slide::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top,
+          rgba(10, 16, 14, 0.96) 18%,
+          rgba(10, 16, 14, 0.55) 48%,
+          rgba(10, 16, 14, 0.25) 100%
+        );
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .slide-bg {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        transform: scale(1.04);
+        transition: transform 8s ease-out;
+        z-index: 0;
+      }
+
+      .slide.active .slide-bg {
+        transform: scale(1);
+      }
+
+      .slide-inner {
+        position: relative;
+        z-index: 2;
+        max-width: 52rem;
+      }
+
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 0.85rem;
+      }
+
+      h1 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(2.1rem, 5.5vw, 3.75rem);
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        max-width: 16ch;
+      }
+
+      h2 {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: clamp(1.7rem, 4vw, 2.75rem);
+        line-height: 1.12;
+        letter-spacing: -0.02em;
+        max-width: 22ch;
+      }
+
+      .lede {
+        margin-top: 1rem;
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        line-height: 1.55;
+        color: var(--muted);
+        max-width: 38rem;
+      }
+
+      .brand {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(2.6rem, 7vw, 4.5rem);
+        letter-spacing: -0.03em;
+        color: var(--accent);
+      }
+
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        margin-top: 1.35rem;
+      }
+
+      .pill {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        border: 1px solid rgba(61, 214, 195, 0.35);
+        color: var(--accent);
+        padding: 0.45rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(61, 214, 195, 0.08);
+      }
+
+      .grid-3 {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 1.4rem;
+        grid-template-columns: 1fr;
+      }
+
+      @media (min-width: 720px) {
+        .grid-3 {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .card {
+        border: 1px solid rgba(236, 236, 228, 0.12);
+        background: rgba(15, 22, 18, 0.72);
+        backdrop-filter: blur(8px);
+        border-radius: 14px;
+        padding: 1rem 1.05rem;
+      }
+
+      .card strong {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        margin-bottom: 0.35rem;
+        color: var(--text);
+      }
+
+      .card span {
+        font-size: 0.88rem;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+
+      .stat-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+      }
+
+      .stat strong {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: clamp(1.6rem, 3vw, 2.2rem);
+        color: var(--harvest);
+      }
+
+      .stat span {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+
+      .handoff {
+        margin-top: 1.25rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .chrome {
+        position: fixed;
+        inset-inline: 0;
+        bottom: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.85rem clamp(1rem, 3vw, 2rem);
+        background: linear-gradient(to top, rgba(10, 16, 14, 0.95), transparent);
+        pointer-events: none;
+      }
+
+      .chrome > * {
+        pointer-events: auto;
+      }
+
+      .dots {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+      }
+
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        border: 0;
+        background: var(--dim);
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .dot.on {
+        background: var(--accent);
+        box-shadow: 0 0 12px rgba(61, 214, 195, 0.45);
+      }
+
+      .nav {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .nav button {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        padding: 0.55rem 0.9rem;
+        cursor: pointer;
+      }
+
+      .nav button:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .hint {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+
+      .team {
+        margin-top: 1.1rem;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .team b {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .slide,
+        .slide-bg {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck" id="deck" aria-live="polite">
+      <!-- 1 -->
+      <section class="slide active" data-i="0">
+        <div
+          class="slide-bg"
+          style="background-image: url('../Images/Farming.jpg')"
+        ></div>
+        <div class="slide-inner">
+          <p class="eyebrow">SP Jain MAIB · Group 3 · AI in Operations</p>
+          <p class="brand">Annadata</p>
+          <p class="lede">
+            AI-driven quality inspection &amp; yield optimization for rural
+            food-processing units.
+          </p>
+          <p class="team">
+            <b>Aftaab</b> · <b>Isaac</b> · <b>Ishaan</b>
+          </p>
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section class="slide" data-i="1">
+        <div
+          class="slide-bg"
+          style="background-image: url('../Images/women-farmers.jpg')"
+        ></div>
+        <div class="slide-inner">
+          <p class="eyebrow">The setting</p>
+          <h2>A rural food-processing SME</h2>
+          <p class="lede">
+            Spices, grains, vegetables, dairy — small teams, thin margins, and
+            quality checks that still depend on the eye and the hand.
+          </p>
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="slide" data-i="2">
+        <div
+          class="slide-bg"
+          style="background-image: url('../Images/vegetable-mandi.jpg')"
+        ></div>
+        <div class="slide-inner">
+          <p class="eyebrow">What breaks</p>
+          <h2>Defects, yield leakage, opaque prices</h2>
+          <div class="grid-3">
+            <div class="card">
+              <strong>Defects slip through</strong>
+              <span>Inconsistent visual sorting → rejects, recalls, wasted
+                batches.</span>
+            </div>
+            <div class="card">
+              <strong>Yield stays guessed</strong>
+              <span>Moisture, raw quality, and machine settings rarely talk to
+                one forecast.</span>
+            </div>
+            <div class="card">
+              <strong>Price is negotiated blind</strong>
+              <span>No shared grade language between farm gate and mandi /
+                buyer.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="slide" data-i="3">
+        <div
+          class="slide-bg"
+          style="background-image: url('../Images/male-farmers.jpg')"
+        ></div>
+        <div class="slide-inner">
+          <p class="eyebrow">The brief</p>
+          <h2>What we were asked to build</h2>
+          <div class="pills">
+            <span class="pill">Computer vision for defects</span>
+            <span class="pill">Yield from quality · moisture · process</span>
+            <span class="pill">Bottleneck simulation</span>
+            <span class="pill">Ops dashboard</span>
+            <span class="pill">Ethics · rural employment</span>
+          </div>
+          <p class="lede" style="margin-top: 1.25rem">
+            Not a slideware model card — a working line: inspect → price →
+            process → sell, with humans still deciding.
+          </p>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section class="slide" data-i="4">
+        <div
+          class="slide-bg"
+          style="background-image: url('../Images/Vegetable-Shopping.jpg')"
+        ></div>
+        <div class="slide-inner">
+          <p class="eyebrow">Stakes</p>
+          <h2>Every bad batch has a rupee cost</h2>
+          <div class="stat-row">
+            <div class="stat">
+              <strong>8% → 3%</strong>
+              <span>Target defect cut</span>
+            </div>
+            <div class="stat">
+              <strong>₹1,000</strong>
+              <span>Saved / cleaned batch*</span>
+            </div>
+            <div class="stat">
+              <strong>3 batches</strong>
+              <span>Payback vs ₹2,500/mo</span>
+            </div>
+          </div>
+          <p class="lede" style="font-size: 0.85rem; margin-top: 1rem">
+            *Illustrative: 50 kg lot at ₹400/kg — same math we show on Ethics.
+          </p>
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section class="slide" data-i="5">
+        <div
+          class="slide-bg"
+          style="background-image: url('../Images/fertilizer-1.jpg')"
+        ></div>
+        <div class="slide-inner">
+          <p class="eyebrow">Our answer</p>
+          <h1>Annadata</h1>
+          <p class="lede">
+            On-device leaf &amp; produce inspection, fair mandi pricing, yield
+            optimization, D2C market — built to assist rural workers, not
+            replace them.
+          </p>
+          <p class="handoff">Next → live product walkthrough</p>
+        </div>
+      </section>
+    </div>
+
+    <div class="chrome">
+      <p class="hint">← → · click · space</p>
+      <div class="dots" id="dots"></div>
+      <div class="nav">
+        <button type="button" id="prev" aria-label="Previous slide">Prev</button>
+        <button type="button" id="next" aria-label="Next slide">Next</button>
+      </div>
+    </div>
+
+    <script>
+      const slides = [...document.querySelectorAll('.slide')]
+      const dotsEl = document.getElementById('dots')
+      let i = 0
+
+      slides.forEach((_, idx) => {
+        const b = document.createElement('button')
+        b.className = 'dot' + (idx === 0 ? ' on' : '')
+        b.type = 'button'
+        b.setAttribute('aria-label', 'Go to slide ' + (idx + 1))
+        b.addEventListener('click', () => go(idx))
+        dotsEl.appendChild(b)
+      })
+
+      function go(n) {
+        i = (n + slides.length) % slides.length
+        slides.forEach((s, idx) => s.classList.toggle('active', idx === i))
+        ;[...dotsEl.children].forEach((d, idx) =>
+          d.classList.toggle('on', idx === i),
+        )
+      }
+
+      document.getElementById('prev').onclick = () => go(i - 1)
+      document.getElementById('next').onclick = () => go(i + 1)
+
+      window.addEventListener('keydown', (e) => {
+        if (['ArrowRight', ' ', 'PageDown', 'Enter'].includes(e.key)) {
+          e.preventDefault()
+          go(i + 1)
+        }
+        if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) {
+          e.preventDefault()
+          go(i - 1)
+        }
+        if (e.key === 'Home') go(0)
+        if (e.key === 'End') go(slides.length - 1)
+      })
+
+      document.getElementById('deck').addEventListener('click', (e) => {
+        if (e.target.closest('button')) return
+        const mid = window.innerWidth / 2
+        go(e.clientX >= mid ? i + 1 : i - 1)
+      })
+    </script>
+  </body>
+</html>

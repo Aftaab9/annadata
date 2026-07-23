@@ -141,34 +141,42 @@ function imageToProduceTensor(
 
 /**
  * Model output is P(Rotten) in [0,1] from the trained Dense+Sigmoid head.
- * Thresholds: <0.4 Fresh, >0.6 Rotten, else Borderline — confidence = model score.
+ * Decision thresholds: <0.4 Fresh, >0.6 Rotten, else Borderline.
+ * Display probs are a soft 3-way split that ALWAYS sums to 1.0 (faculty-readable).
  */
 function fromBinaryRottenProb(pRottenRaw: number): {
   class: ProduceClass
   confidence: number
   probabilities: Record<ProduceClass, number>
 } {
-  const pRotten = Math.min(1, Math.max(0, pRottenRaw))
-  const pFresh = 1 - pRotten
+  const p = Math.min(1, Math.max(0, pRottenRaw))
+
+  // Soft membership centered on Fresh / Borderline / Rotten regions
+  const gauss = (center: number, width: number) =>
+    Math.exp(-0.5 * ((p - center) / width) ** 2)
+  let fresh = gauss(0.15, 0.16)
+  let borderline = gauss(0.5, 0.12)
+  let rotten = gauss(0.85, 0.16)
+  const z = fresh + borderline + rotten || 1
+  fresh /= z
+  borderline /= z
+  rotten /= z
+
   let cls: ProduceClass
-  let confidence: number
-  if (pRotten < 0.4) {
-    cls = 'FRESH'
-    confidence = pFresh
-  } else if (pRotten > 0.6) {
-    cls = 'ROTTEN'
-    confidence = pRotten
-  } else {
-    cls = 'BORDERLINE'
-    confidence = 1 - Math.abs(pRotten - 0.5) * 2
-  }
+  if (p < 0.4) cls = 'FRESH'
+  else if (p > 0.6) cls = 'ROTTEN'
+  else cls = 'BORDERLINE'
+
+  const confidence =
+    cls === 'FRESH' ? fresh : cls === 'BORDERLINE' ? borderline : rotten
+
   return {
     class: cls,
     confidence,
     probabilities: {
-      FRESH: pFresh,
-      BORDERLINE: cls === 'BORDERLINE' ? confidence : Math.min(pFresh, pRotten),
-      ROTTEN: pRotten,
+      FRESH: fresh,
+      BORDERLINE: borderline,
+      ROTTEN: rotten,
     },
   }
 }

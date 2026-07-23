@@ -6,6 +6,7 @@ import { recommendCrop, type CropRecResult } from '@/services'
 import type { CropRecInputs } from '@/services/types'
 import { cropIcon } from '@/lib/cropIcons'
 import { probeOnnxArtifacts } from '@/lib/onnxProbe'
+import { clearOnnxSessionCache } from '@/lib/onnxRuntime'
 import { cn } from '@/lib/cn'
 
 const FIELD_META: {
@@ -25,6 +26,40 @@ const FIELD_META: {
   { key: 'rainfall', label: 'Rainfall', unit: 'mm', step: 5, min: 20, max: 300 },
 ]
 
+/** Demo presets — click to jump sliders to a profile that yields that crop. */
+const CROP_PRESETS: { id: string; label: string; values: CropRecInputs }[] = [
+  {
+    id: 'maize',
+    label: 'Maize',
+    values: { N: 78, P: 48, K: 20, temperature: 22, humidity: 65, ph: 6.2, rainfall: 85 },
+  },
+  {
+    id: 'apple',
+    label: 'Apple',
+    values: { N: 20, P: 134, K: 200, temperature: 22, humidity: 92, ph: 5.9, rainfall: 115 },
+  },
+  {
+    id: 'potato',
+    label: 'Potato',
+    values: { N: 100, P: 65, K: 100, temperature: 17, humidity: 80, ph: 5.8, rainfall: 80 },
+  },
+  {
+    id: 'tomato',
+    label: 'Tomato',
+    values: { N: 100, P: 50, K: 55, temperature: 24, humidity: 70, ph: 6.5, rainfall: 90 },
+  },
+  {
+    id: 'soybean',
+    label: 'Soybean',
+    values: { N: 40, P: 55, K: 45, temperature: 25, humidity: 65, ph: 6.5, rainfall: 75 },
+  },
+  {
+    id: 'pepper',
+    label: 'Pepper',
+    values: { N: 120, P: 50, K: 65, temperature: 25, humidity: 60, ph: 6.3, rainfall: 80 },
+  },
+]
+
 export function CropRecPanel() {
   const cropRecInputs = useStore((s) => s.cropRecInputs)
   const setCropRecInputs = useStore((s) => s.setCropRecInputs)
@@ -33,17 +68,30 @@ export function CropRecPanel() {
   const [onnxReady, setOnnxReady] = useState(false)
 
   useEffect(() => {
+    clearOnnxSessionCache()
     probeOnnxArtifacts().then((s) => setOnnxReady(s.cropRec))
   }, [])
 
   useEffect(() => {
+    let cancelled = false
     setLoading(true)
     const t = setTimeout(() => {
       recommendCrop(cropRecInputs)
-        .then(setResult)
-        .finally(() => setLoading(false))
+        .then((r) => {
+          if (!cancelled) setResult(r)
+        })
+        .catch((err) => {
+          console.warn('[CropRecPanel] recommend failed', err)
+          if (!cancelled) setResult(null)
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false)
+        })
     }, 200)
-    return () => clearTimeout(t)
+    return () => {
+      cancelled = true
+      clearTimeout(t)
+    }
   }, [cropRecInputs])
 
   return (
@@ -58,7 +106,7 @@ export function CropRecPanel() {
           )}
         >
           {onnxReady
-            ? 'Live · crop_rec.onnx RandomForest (99.3% hold-out)'
+            ? 'Live · crop_rec.onnx · 6 Annadata SKUs (96.7% hold-out)'
             : 'Lookup mode · drop crop_rec.onnx from Colab for trained RF'}
         </p>
         <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-cyan">
@@ -66,9 +114,30 @@ export function CropRecPanel() {
         </p>
         <p className="mt-1 text-sm text-muted">
           {onnxReady
-            ? 'Soil + climate → Colab RandomForest ONNX (22 crops).'
-            : 'Soil + climate → nearest crop from Kaggle centroids (lookup until ONNX loads).'}
+            ? 'Soil + climate → RandomForest ONNX for Apple, Maize, Pepper, Potato, Soybean, Tomato.'
+            : 'Soil + climate → nearest Annadata crop centroid until ONNX loads.'}
         </p>
+        <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-dim">
+          Try a soil profile
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {CROP_PRESETS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setCropRecInputs(p.values)}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors',
+                result?.crop === p.id
+                  ? 'border-cyan/50 bg-cyan/15 text-cyan'
+                  : 'border-[var(--border)] bg-[var(--surface)] text-muted hover:border-cyan/40 hover:text-text',
+              )}
+            >
+              <span aria-hidden>{cropIcon(p.id)}</span>
+              {p.label}
+            </button>
+          ))}
+        </div>
         <div className="mt-5 space-y-4">
           {FIELD_META.map(({ key, label, unit, step, min, max }) => (
             <label key={key} className="block">
@@ -107,8 +176,8 @@ export function CropRecPanel() {
               </p>
               <p className="mt-1 text-2xl font-bold text-text">{result.label}</p>
               <p className="mt-1 font-mono text-sm text-cyan">
-                {Math.round(result.confidence * 100)}% match ·{' '}
-                {result.source === 'model' ? 'lookup model' : 'fallback'}
+                {Math.round(result.confidence * 100)}% RF vote share · ONNX
+                  RandomForest
               </p>
               <p className="mt-2 text-sm leading-relaxed text-muted">{result.reason}</p>
             </div>
@@ -144,6 +213,12 @@ export function CropRecPanel() {
         <Card className="animate-pulse py-8 text-center text-sm text-muted">
           <Sprout className="mx-auto h-6 w-6 text-cyan" aria-hidden />
           <p className="mt-2">Analyzing soil profile…</p>
+        </Card>
+      )}
+
+      {!result && !loading && (
+        <Card className="border-warning/30 bg-warning/5 py-6 text-center text-sm text-muted">
+          <p>Could not compute a crop recommendation. Adjust sliders and try again.</p>
         </Card>
       )}
     </div>

@@ -62,6 +62,40 @@ const SKILL_LADDER = [
   },
 ]
 
+/** Explicit brief: automation → employment & skill displacement */
+const ROLE_SHIFTS = [
+  {
+    from: 'Line sorter (100% visual)',
+    to: 'Exception validator',
+    note: 'Reviews only low-confidence / Grade C flags',
+  },
+  {
+    from: 'Price taker at mandi',
+    to: 'Grade-card negotiator',
+    note: 'Defends A/B premium with inspection proof',
+  },
+  {
+    from: 'Shift supervisor (gut feel)',
+    to: 'Yield scenario owner',
+    note: 'Uses moisture/grade/RPM sim to clear bottlenecks',
+  },
+]
+
+const DISPLACEMENT = [
+  {
+    risk: 'Cameras cut pure hand-sorting hours',
+    response: 'HITL keeps humans on reject/accept; AI never auto-ships',
+  },
+  {
+    risk: 'Younger workers learn phones; elders feel displaced',
+    response: 'Bilingual voice verdicts + simple Grade Card; supervisor role stays',
+  },
+  {
+    risk: 'SME cuts headcount to “pay for AI”',
+    response: '₹2,500/mo payback from less waste — business case is loss cut, not payroll cut',
+  },
+]
+
 const SDGS = [
   {
     code: '02',
@@ -203,6 +237,52 @@ export default function Ethics() {
                   </li>
                 ))}
               </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-5 overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
+          <p className="border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-muted">
+            Role shifts — skill displacement answered with elevation
+          </p>
+          <div className="divide-y divide-[var(--border)]">
+            {ROLE_SHIFTS.map((r) => (
+              <div
+                key={r.from}
+                className="grid gap-1 px-4 py-3 text-sm sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-3"
+              >
+                <p className="text-muted">{r.from}</p>
+                <ArrowRight className="hidden h-4 w-4 text-cyan sm:block" aria-hidden />
+                <div>
+                  <p className="font-medium text-text">{r.to}</p>
+                  <p className="text-xs text-dim">{r.note}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-5 space-y-3">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-warning">
+            Displacement risk → our product response
+          </p>
+          {DISPLACEMENT.map((d) => (
+            <div
+              key={d.risk}
+              className="grid gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4 sm:grid-cols-2"
+            >
+              <div>
+                <p className="font-mono text-[9px] uppercase tracking-widest text-warning">
+                  Risk
+                </p>
+                <p className="mt-1 text-sm text-muted">{d.risk}</p>
+              </div>
+              <div>
+                <p className="font-mono text-[9px] uppercase tracking-widest text-healthy">
+                  Annadata response
+                </p>
+                <p className="mt-1 text-sm text-text">{d.response}</p>
+              </div>
             </div>
           ))}
         </div>

@@ -20,6 +20,9 @@ export interface InspectionRecord {
   crop: string
   result: ClassificationResult
   thumbnail?: string
+  /** leaf | produce — so history restore uses the right labels */
+  mode?: 'leaf' | 'produce'
+  gradeCard?: GradeCardData
 }
 
 export interface YieldScenarioPoint {
@@ -79,6 +82,12 @@ interface AppState {
 
   gradeCard: GradeCardData | null
   setGradeCard: (card: GradeCardData | null) => void
+
+  /** Last inspect preview (data URL) — restore result after navigating away */
+  lastInspectPreview: string | null
+  setLastInspectPreview: (url: string | null) => void
+  lastInspectMode: 'leaf' | 'produce'
+  setLastInspectMode: (mode: 'leaf' | 'produce') => void
 }
 
 export const useStore = create<AppState>()(
@@ -155,6 +164,11 @@ export const useStore = create<AppState>()(
 
       gradeCard: null,
       setGradeCard: (gradeCard) => set({ gradeCard }),
+
+      lastInspectPreview: null,
+      setLastInspectPreview: (lastInspectPreview) => set({ lastInspectPreview }),
+      lastInspectMode: 'produce',
+      setLastInspectMode: (lastInspectMode) => set({ lastInspectMode }),
     }),
     {
       name: 'agrosight-store',
@@ -163,6 +177,13 @@ export const useStore = create<AppState>()(
         inspectionHistory: s.inspectionHistory,
         yieldScenarioHistory: s.yieldScenarioHistory,
         location: s.location,
+        // Keep last verdict so Yield → Inspect doesn't force a rescan
+        cvResult: s.cvResult,
+        gradeCard: s.gradeCard,
+        lastInspectPreview: s.lastInspectPreview,
+        lastInspectMode: s.lastInspectMode,
+        defectRateAutoFilled: s.defectRateAutoFilled,
+        yieldParams: s.yieldParams,
       }),
     },
   ),

@@ -71,6 +71,8 @@ export interface FertilizerResult {
   fertilizer: string
   reason: string
   source: 'mock' | 'model'
+  confidence?: number
+  alternatives?: { fertilizer: string; confidence: number }[]
 }
 
 export interface WeatherDay {

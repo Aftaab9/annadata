@@ -75,7 +75,12 @@ except Exception as e:
 # Export ONNX (sklearn RF path preferred for skl2onnx)
 export_model = rf  # skl2onnx is reliable for RF
 initial_type = [("float_input", FloatTensorType([None, 7]))]
-onnx_model = convert_sklearn(export_model, initial_types=initial_type, target_opset=12)
+onnx_model = convert_sklearn(
+    export_model,
+    initial_types=initial_type,
+    target_opset=12,
+    options={type(export_model): {"zipmap": False}},
+)
 onnx_path = OUT / "crop_rec.onnx"
 with open(onnx_path, "wb") as f:
     f.write(onnx_model.SerializeToString())

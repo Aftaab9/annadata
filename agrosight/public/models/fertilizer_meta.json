@@ -26,17 +26,55 @@
     "Sandy"
   ],
   "crop_classes": [
-    "Barley",
-    "Cotton",
-    "Ground Nuts",
+    "Apple",
     "Maize",
-    "Millets",
-    "Oil seeds",
-    "Paddy",
-    "Pulses",
-    "Sugarcane",
-    "Tobacco",
-    "Wheat"
+    "Pepper",
+    "Potato",
+    "Soybean",
+    "Tomato"
   ],
-  "accuracy": 100.0
+  "accuracy": 84.44,
+  "sku_aligned": true,
+  "annadata_crops": [
+    "Apple",
+    "Maize",
+    "Pepper",
+    "Potato",
+    "Soybean",
+    "Tomato"
+  ],
+  "npk_targets": {
+    "Apple": {
+      "N": 25,
+      "P": 40,
+      "K": 45
+    },
+    "Maize": {
+      "N": 40,
+      "P": 25,
+      "K": 20
+    },
+    "Pepper": {
+      "N": 45,
+      "P": 30,
+      "K": 35
+    },
+    "Potato": {
+      "N": 40,
+      "P": 35,
+      "K": 45
+    },
+    "Soybean": {
+      "N": 20,
+      "P": 30,
+      "K": 25
+    },
+    "Tomato": {
+      "N": 45,
+      "P": 30,
+      "K": 40
+    }
+  },
+  "exported": "random_forest",
+  "zipmap": false
 }

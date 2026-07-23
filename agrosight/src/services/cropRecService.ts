@@ -73,32 +73,7 @@ function titleCase(s: string) {
   return s.replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-/** Prefer Colab RF ONNX; fall back to centroid lookup. */
-export async function recommendCrop(inputs: CropRecInputs): Promise<CropRecResult> {
-  const features = FEATURE_KEYS.map((k) => inputs[k])
-  const onnx = await runClassifierOnnx(CROP_REC_ONNX, CROP_REC_META, features)
-
-  if (onnx) {
-    const ranked = onnx.probabilities
-      .map((p, i) => ({ i, p }))
-      .sort((a, b) => b.p - a.p)
-    const top = ranked.slice(0, 4)
-    const bestName = onnx.className
-    const acc = onnx.meta.accuracy
-    return {
-      crop: bestName,
-      label: titleCase(bestName),
-      confidence: Math.round(onnx.confidence * 100) / 100,
-      source: 'model',
-      reason: `RandomForest ONNX (${acc != null ? `${acc}% hold-out` : 'Colab'}) — top class ${titleCase(bestName)}.`,
-      alternatives: top.slice(1).map((t) => ({
-        crop: onnx.meta.classes[t.i] ?? String(t.i),
-        label: titleCase(onnx.meta.classes[t.i] ?? String(t.i)),
-        confidence: Math.round(t.p * 100) / 100,
-      })),
-    }
-  }
-
+async function lookupCrop(inputs: CropRecInputs): Promise<CropRecResult> {
   const centroids = await loadCentroids()
   const ranked = centroids
     .map((c) => ({ c, dist: distance(inputs, c) }))
@@ -122,39 +97,120 @@ export async function recommendCrop(inputs: CropRecInputs): Promise<CropRecResul
   }
 }
 
+/** Prefer Colab RF ONNX; fall back to centroid lookup. */
+export async function recommendCrop(inputs: CropRecInputs): Promise<CropRecResult> {
+  try {
+    const features = FEATURE_KEYS.map((k) => inputs[k])
+    const onnx = await runClassifierOnnx(CROP_REC_ONNX, CROP_REC_META, features)
+
+    if (onnx) {
+      const ranked = onnx.probabilities
+        .map((p, i) => ({ i, p }))
+        .sort((a, b) => b.p - a.p)
+      const top = ranked.filter((t) => t.p > 0.01).slice(0, 4)
+      const bestName = onnx.className
+      const acc = onnx.meta.accuracy
+      return {
+        crop: bestName,
+        label: titleCase(bestName),
+        confidence: Math.round(onnx.confidence * 1000) / 1000,
+        source: 'model',
+        reason: `RandomForest ONNX (${acc != null ? `${acc}% hold-out` : 'Colab'}) votes ${(onnx.confidence * 100).toFixed(0)}% for ${titleCase(bestName)} given these soil + climate inputs.`,
+        alternatives: top.slice(1).map((t) => ({
+          crop: onnx.meta.classes[t.i] ?? String(t.i),
+          label: titleCase(onnx.meta.classes[t.i] ?? String(t.i)),
+          confidence: Math.round(t.p * 1000) / 1000,
+        })),
+      }
+    }
+  } catch (e) {
+    console.warn('[cropRecService] ONNX path failed, using lookup:', e)
+  }
+
+  return lookupCrop(inputs)
+}
+
 export const DEFAULT_CROP_REC_INPUTS: CropRecInputs = {
-  N: 90,
-  P: 42,
-  K: 43,
-  temperature: 26,
+  N: 78,
+  P: 48,
+  K: 20,
+  temperature: 22,
   humidity: 65,
-  ph: 6.5,
-  rainfall: 120,
+  ph: 6.2,
+  rainfall: 85,
 }
 
 const FALLBACK_CENTROIDS: CropCentroid[] = [
   {
     crop: 'maize',
     label: 'Maize',
-    N: 90,
-    P: 42,
-    K: 43,
-    temperature: 26,
+    N: 78,
+    P: 48,
+    K: 20,
+    temperature: 22,
     humidity: 65,
-    ph: 6.5,
-    rainfall: 110,
-    reason: 'Warm climate with moderate rain fits maize.',
+    ph: 6.2,
+    rainfall: 85,
+    reason: 'Warm moderate-rain profile fits maize.',
   },
   {
-    crop: 'rice',
-    label: 'Rice',
-    N: 80,
-    P: 48,
-    K: 40,
+    crop: 'tomato',
+    label: 'Tomato',
+    N: 100,
+    P: 50,
+    K: 55,
     temperature: 24,
-    humidity: 83,
-    ph: 6.4,
-    rainfall: 230,
-    reason: 'High rainfall and humidity suit paddy cultivation.',
+    humidity: 70,
+    ph: 6.5,
+    rainfall: 90,
+    reason: 'Balanced NPK and warm humidity suit tomato.',
+  },
+  {
+    crop: 'potato',
+    label: 'Potato',
+    N: 100,
+    P: 65,
+    K: 100,
+    temperature: 17,
+    humidity: 80,
+    ph: 5.8,
+    rainfall: 80,
+    reason: 'Cool climate with high K fits potato.',
+  },
+  {
+    crop: 'apple',
+    label: 'Apple',
+    N: 21,
+    P: 134,
+    K: 200,
+    temperature: 22,
+    humidity: 92,
+    ph: 5.9,
+    rainfall: 113,
+    reason: 'High P/K and cool-humid profile fits apple.',
+  },
+  {
+    crop: 'pepper',
+    label: 'Pepper',
+    N: 120,
+    P: 50,
+    K: 65,
+    temperature: 25,
+    humidity: 60,
+    ph: 6.3,
+    rainfall: 80,
+    reason: 'High N warm profile fits bell pepper.',
+  },
+  {
+    crop: 'soybean',
+    label: 'Soybean',
+    N: 40,
+    P: 55,
+    K: 45,
+    temperature: 25,
+    humidity: 65,
+    ph: 6.5,
+    rainfall: 75,
+    reason: 'Lower N (legume) with balanced PK fits soybean.',
   },
 ]

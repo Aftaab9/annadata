@@ -37,6 +37,22 @@ import { DefectRecommendation } from '@/components/inspect/DefectRecommendation'
 import { useStore } from '@/store/useStore'
 import { cn } from '@/lib/cn'
 
+/** Round class probs to integer % that sum to exactly 100 (largest-remainder). */
+function percentParts(values: number[]): number[] {
+  const raw = values.map((v) => Math.max(0, v) * 100)
+  const floored = raw.map((v) => Math.floor(v))
+  let rem = 100 - floored.reduce((a, b) => a + b, 0)
+  const order = raw
+    .map((v, i) => ({ i, frac: v - Math.floor(v) }))
+    .sort((a, b) => b.frac - a.frac)
+  const out = [...floored]
+  for (let k = 0; k < order.length && rem > 0; k++) {
+    out[order[k]!.i]! += 1
+    rem -= 1
+  }
+  return out
+}
+
 const DEFECT_COLORS: Record<DefectClass, string> = {
   HEALTHY: 'var(--healthy)',
   SURFACE_DEFECT: 'var(--warning)',
@@ -273,16 +289,20 @@ export function InspectResultCard({
           <div className="mt-5 space-y-2">
             <p className="font-mono text-[10px] uppercase tracking-widest text-muted">
               Per-class probabilities
+              <span className="ml-2 text-dim">(sum 100%)</span>
             </p>
             {isProduce
-              ? (['FRESH', 'BORDERLINE', 'ROTTEN'] as ProduceClass[]).map((cls) => {
-                  const mapped =
+              ? (() => {
+                  const keys = ['FRESH', 'BORDERLINE', 'ROTTEN'] as ProduceClass[]
+                  const mapped = keys.map((cls) =>
                     cls === 'FRESH'
-                      ? result.probabilities.HEALTHY
+                      ? (result.probabilities.HEALTHY ?? 0)
                       : cls === 'BORDERLINE'
-                        ? result.probabilities.SURFACE_DEFECT
-                        : result.probabilities.BLIGHT_MOLD
-                  return (
+                        ? (result.probabilities.SURFACE_DEFECT ?? 0)
+                        : (result.probabilities.BLIGHT_MOLD ?? 0),
+                  )
+                  const pcts = percentParts(mapped)
+                  return keys.map((cls, i) => (
                     <div key={cls} className="flex items-center gap-3">
                       <span className="w-28 shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted">
                         {PRODUCE_LABELS[cls].split(' / ')[0]}
@@ -292,17 +312,21 @@ export function InspectResultCard({
                           className="h-full rounded-full"
                           style={{ backgroundColor: PRODUCE_COLORS[cls] }}
                           initial={{ width: 0 }}
-                          animate={{ width: `${(mapped ?? 0) * 100}%` }}
+                          animate={{ width: `${pcts[i] ?? 0}%` }}
                           transition={{ delay: 0.25, duration: 0.6, ease: 'easeOut' }}
                         />
                       </div>
                       <span className="w-12 text-right font-mono text-sm font-medium text-text">
-                        {Math.round((mapped ?? 0) * 100)}%
+                        {pcts[i] ?? 0}%
                       </span>
                     </div>
+                  ))
+                })()
+              : (() => {
+                  const pcts = percentParts(
+                    DEFECT_CLASSES.map((cls) => result.probabilities[cls] ?? 0),
                   )
-                })
-              : DEFECT_CLASSES.map((cls) => (
+                  return DEFECT_CLASSES.map((cls, i) => (
                   <div key={cls} className="flex items-center gap-3">
                     <span className="w-28 shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted">
                       {DEFECT_LABELS[cls]}
@@ -313,16 +337,17 @@ export function InspectResultCard({
                         style={{ backgroundColor: DEFECT_COLORS[cls] }}
                         initial={{ width: 0 }}
                         animate={{
-                          width: `${(result.probabilities[cls] ?? 0) * 100}%`,
+                          width: `${pcts[i] ?? 0}%`,
                         }}
                         transition={{ delay: 0.25, duration: 0.6, ease: 'easeOut' }}
                       />
                     </div>
                     <span className="w-12 text-right font-mono text-sm font-medium text-text">
-                      {Math.round((result.probabilities[cls] ?? 0) * 100)}%
+                      {pcts[i] ?? 0}%
                     </span>
                   </div>
-                ))}
+                  ))
+                })()}
           </div>
 
             <div

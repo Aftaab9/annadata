@@ -5,11 +5,14 @@ import { useStore } from '@/store/useStore'
 import {
   FERTILIZER_CROP_OPTIONS,
   FERTILIZER_SOIL_OPTIONS,
+  fertilizerDisplayName,
+  fertilizerGradeHint,
   recommendFertilizer,
   type FertilizerResult,
 } from '@/services/fertilizerService'
 import { cn } from '@/lib/cn'
 import { probeOnnxArtifacts } from '@/lib/onnxProbe'
+import { clearOnnxSessionCache } from '@/lib/onnxRuntime'
 
 export function FertilizerPanel() {
   const fertilizerInputs = useStore((s) => s.fertilizerInputs)
@@ -19,17 +22,30 @@ export function FertilizerPanel() {
   const [onnxReady, setOnnxReady] = useState(false)
 
   useEffect(() => {
+    clearOnnxSessionCache()
     probeOnnxArtifacts().then((s) => setOnnxReady(s.fertilizer))
   }, [])
 
   useEffect(() => {
+    let cancelled = false
     setLoading(true)
     const t = setTimeout(() => {
       recommendFertilizer(fertilizerInputs)
-        .then(setResult)
-        .finally(() => setLoading(false))
+        .then((r) => {
+          if (!cancelled) setResult(r)
+        })
+        .catch((err) => {
+          console.warn('[FertilizerPanel] recommend failed', err)
+          if (!cancelled) setResult(null)
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false)
+        })
     }, 200)
-    return () => clearTimeout(t)
+    return () => {
+      cancelled = true
+      clearTimeout(t)
+    }
   }, [fertilizerInputs])
 
   const npk = [
@@ -56,15 +72,41 @@ export function FertilizerPanel() {
           )}
         >
           {onnxReady
-            ? 'Live · fertilizer.onnx RandomForest (100% hold-out)'
+            ? 'Live · fertilizer.onnx · 6 Annadata crops (84% hold-out)'
             : 'Lookup mode · drop fertilizer.onnx from Colab'}
         </p>
         <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-cyan">
           Fertilizer advice
         </p>
         <p className="mt-1 text-sm text-muted">
-          Soil + climate + NPK → Colab-trained RF class (Urea, DAP, NPK blends…).
+          Soil-test NPK + climate + crop → RandomForest. Bag codes like{' '}
+          <span className="text-text">10-26-26</span> mean % Nitrogen–Phosphorus–Potassium
+          (not a mystery ID). There is no “17-20-20” here — you may be seeing{' '}
+          <span className="text-text">17-17-17</span> (balanced) or <span className="text-text">20-20</span> (N+P).
         </p>
+
+        <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-dim">
+          Try a soil-test preset
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {(
+            [
+              { label: 'Low N → Urea', N: 8, P: 25, K: 20 },
+              { label: 'Low P → DAP', N: 40, P: 5, K: 20 },
+              { label: 'Low P+K → 10-26-26', N: 40, P: 8, K: 5 },
+              { label: 'Balanced → 17-17-17', N: 40, P: 25, K: 20 },
+            ] as const
+          ).map((p) => (
+            <button
+              key={p.label}
+              type="button"
+              onClick={() => setFertilizerInputs({ N: p.N, P: p.P, K: p.K })}
+              className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs text-muted hover:border-teal/40 hover:text-text"
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
 
         <label className="mt-4 block text-xs text-muted">
           Crop type
@@ -144,18 +186,59 @@ export function FertilizerPanel() {
         </div>
       </Card>
 
-      <Card>
+      <Card className={result ? 'border-teal/30 bg-teal/5' : undefined}>
         {loading && (
           <p className="font-mono text-xs text-muted">Running model…</p>
         )}
         {!loading && result && (
-          <div className="flex gap-3">
-            <FlaskConical className="mt-0.5 h-5 w-5 shrink-0 text-teal" />
-            <div>
-              <p className="font-display text-lg text-text">{result.fertilizer}</p>
-              <p className="mt-1 text-sm text-muted">{result.reason}</p>
+          <div>
+            <div className="flex gap-3">
+              <FlaskConical className="mt-0.5 h-5 w-5 shrink-0 text-teal" />
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-teal">
+                  Recommended fertilizer
+                </p>
+                <p className="mt-1 font-display text-lg text-text">
+                  {fertilizerDisplayName(result.fertilizer)}
+                </p>
+                <p className="mt-0.5 font-mono text-[11px] text-dim">
+                  {fertilizerGradeHint(result.fertilizer)}
+                </p>
+                {result.confidence != null && (
+                  <p className="mt-1 font-mono text-sm text-cyan">
+                    {Math.round(result.confidence * 100)}% RF vote share
+                  </p>
+                )}
+                <p className="mt-1 text-sm text-muted">{result.reason}</p>
+              </div>
             </div>
+            {result.alternatives && result.alternatives.length > 0 && (
+              <div className="mt-5 border-t border-[var(--border)] pt-4">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-dim">
+                  Also consider
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {result.alternatives.map((alt) => (
+                    <span
+                      key={alt.fertilizer}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs text-muted"
+                      title={fertilizerGradeHint(alt.fertilizer)}
+                    >
+                      {fertilizerDisplayName(alt.fertilizer)}
+                      <span className="font-mono text-dim">
+                        {Math.round(alt.confidence * 100)}%
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+        )}
+        {!loading && !result && (
+          <p className="text-sm text-muted">
+            Could not run fertilizer ONNX. Check models/fertilizer.onnx is present.
+          </p>
         )}
       </Card>
     </div>

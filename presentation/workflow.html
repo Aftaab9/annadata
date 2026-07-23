@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Annadata — Workflow Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;500;600&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #090e0c;
+        --surface: #121a16;
+        --surface-2: #182119;
+        --text: #ecece4;
+        --muted: #9aaba0;
+        --dim: #5c6b62;
+        --accent: #3dd6c3;
+        --harvest: #e8b45c;
+        --healthy: #3ecf8e;
+        --danger: #e07060;
+        --border: rgba(236, 236, 228, 0.1);
+        --fd: 'Syne', system-ui, sans-serif;
+        --fu: 'Sora', system-ui, sans-serif;
+        --fm: 'JetBrains Mono', ui-monospace, monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--fu);
+        overflow: hidden;
+      }
+      .progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 2px;
+        background: var(--accent);
+        z-index: 40;
+        transition: width 0.25s ease;
+      }
+      .deck {
+        height: 100%;
+        position: relative;
+      }
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        padding: clamp(1.25rem, 3vw, 2.5rem);
+        padding-bottom: 4.1rem;
+        background:
+          radial-gradient(ellipse 70% 45% at 100% -10%, rgba(61, 214, 195, 0.09), transparent),
+          radial-gradient(ellipse 50% 35% at -5% 110%, rgba(232, 180, 92, 0.05), transparent),
+          var(--bg);
+      }
+      .slide.active {
+        display: flex;
+        animation: fade 0.32s ease;
+      }
+      @keyframes fade {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .sec {
+        font-family: var(--fm);
+        font-size: 0.65rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 0.45rem;
+      }
+      h1 {
+        font-family: var(--fd);
+        font-weight: 800;
+        font-size: clamp(1.85rem, 4.5vw, 3.1rem);
+        letter-spacing: -0.03em;
+        line-height: 1.08;
+      }
+      h2 {
+        font-family: var(--fd);
+        font-weight: 700;
+        font-size: clamp(1.35rem, 2.8vw, 2rem);
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 0.85rem;
+      }
+      .lead {
+        color: var(--muted);
+        font-size: clamp(0.92rem, 1.5vw, 1.05rem);
+        line-height: 1.45;
+        max-width: 42rem;
+        margin-top: 0.5rem;
+      }
+      .brand {
+        font-family: var(--fd);
+        font-weight: 800;
+        font-size: clamp(2.5rem, 6.5vw, 4.2rem);
+        color: var(--accent);
+        letter-spacing: -0.03em;
+      }
+      .fill {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 0;
+        gap: 0.75rem;
+      }
+      .g2,
+      .g3,
+      .g4 {
+        display: grid;
+        gap: 0.7rem;
+      }
+      .g2 {
+        grid-template-columns: 1fr;
+      }
+      .g3 {
+        grid-template-columns: 1fr;
+      }
+      .g4 {
+        grid-template-columns: 1fr 1fr;
+      }
+      @media (min-width: 780px) {
+        .g2 {
+          grid-template-columns: 1fr 1fr;
+        }
+        .g3 {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .g4 {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+      }
+      .card.hi {
+        border-color: rgba(61, 214, 195, 0.42);
+        background: rgba(61, 214, 195, 0.07);
+      }
+      .card.ok {
+        border-color: rgba(62, 207, 142, 0.42);
+        background: rgba(62, 207, 142, 0.06);
+      }
+      .card.warn {
+        border-color: rgba(232, 180, 92, 0.42);
+        background: rgba(232, 180, 92, 0.06);
+      }
+      .card.bad {
+        border-color: rgba(224, 112, 96, 0.42);
+        background: rgba(224, 112, 96, 0.06);
+      }
+      .card h3 {
+        font-family: var(--fd);
+        font-size: 1rem;
+        margin: 0.2rem 0 0.35rem;
+      }
+      .card p,
+      .card li {
+        color: var(--muted);
+        font-size: 0.84rem;
+        line-height: 1.4;
+      }
+      .card ul {
+        list-style: none;
+        margin-top: 0.35rem;
+      }
+      .card li + li {
+        margin-top: 0.2rem;
+      }
+      .card li::before {
+        content: '·';
+        color: var(--accent);
+        margin-right: 0.4rem;
+      }
+      .tag {
+        font-family: var(--fm);
+        font-size: 0.58rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .tag.gold {
+        color: var(--harvest);
+      }
+      .tag.ok {
+        color: var(--healthy);
+      }
+      .tag.bad {
+        color: var(--danger);
+      }
+      .num {
+        font-family: var(--fm);
+        font-weight: 600;
+        font-size: clamp(1.55rem, 3.2vw, 2.2rem);
+        color: var(--accent);
+        line-height: 1;
+      }
+      .num.gold {
+        color: var(--harvest);
+      }
+      .num.ok {
+        color: var(--healthy);
+      }
+      .lbl {
+        font-family: var(--fm);
+        font-size: 0.58rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dim);
+        margin-top: 0.3rem;
+      }
+      .callout {
+        border-left: 3px solid var(--accent);
+        background: rgba(61, 214, 195, 0.06);
+        border-radius: 0 10px 10px 0;
+        padding: 0.75rem 0.95rem;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+      .callout b {
+        color: var(--accent);
+      }
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        align-items: center;
+      }
+      .node {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.45rem 0.7rem;
+        font-size: 0.78rem;
+      }
+      .node.hi {
+        border-color: rgba(61, 214, 195, 0.45);
+        color: var(--accent);
+      }
+      .node.ok {
+        border-color: rgba(62, 207, 142, 0.45);
+        color: var(--healthy);
+      }
+      .arr {
+        color: var(--dim);
+        font-family: var(--fm);
+        font-size: 0.75rem;
+      }
+      .steps {
+        display: grid;
+        gap: 0.5rem;
+      }
+      @media (min-width: 900px) {
+        .steps.row {
+          grid-template-columns: repeat(5, 1fr);
+        }
+        .steps.row4 {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        .steps.row6 {
+          grid-template-columns: repeat(6, 1fr);
+        }
+      }
+      .step {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0.8rem 0.85rem;
+      }
+      .step::before {
+        counter-increment: s;
+        content: '0' counter(s);
+        font-family: var(--fm);
+        font-size: 0.62rem;
+        color: var(--accent);
+        letter-spacing: 0.1em;
+        display: block;
+        margin-bottom: 0.3rem;
+      }
+      .step strong {
+        display: block;
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+      }
+      .step span {
+        font-size: 0.76rem;
+        color: var(--muted);
+        line-height: 1.35;
+      }
+      .toc {
+        display: grid;
+        gap: 0.4rem;
+        grid-template-columns: 1fr 1fr;
+      }
+      @media (min-width: 800px) {
+        .toc {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+      .toc div {
+        display: flex;
+        gap: 0.55rem;
+        align-items: baseline;
+        padding: 0.55rem 0.7rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 0.82rem;
+      }
+      .toc span {
+        font-family: var(--fm);
+        font-size: 0.62rem;
+        color: var(--accent);
+      }
+      .chrome {
+        position: fixed;
+        inset-inline: 0;
+        bottom: 0;
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.7rem clamp(0.9rem, 2.5vw, 1.75rem);
+        background: linear-gradient(to top, rgba(9, 14, 12, 0.98), transparent);
+        pointer-events: none;
+      }
+      .chrome > * {
+        pointer-events: auto;
+      }
+      .dots {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.28rem;
+        justify-content: center;
+        max-width: 50vw;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        border: 0;
+        background: var(--dim);
+        cursor: pointer;
+      }
+      .dot.on {
+        background: var(--accent);
+        box-shadow: 0 0 8px rgba(61, 214, 195, 0.45);
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+      }
+      .nav button {
+        font-family: var(--fm);
+        font-size: 0.6rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.45rem 0.75rem;
+        cursor: pointer;
+      }
+      .nav button:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .hint {
+        font-family: var(--fm);
+        font-size: 0.55rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--dim);
+        white-space: nowrap;
+      }
+      .meta {
+        margin-top: 0.85rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .meta b {
+        color: var(--text);
+      }
+      .meta a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .split {
+        display: grid;
+        gap: 0.85rem;
+        align-items: center;
+      }
+      @media (min-width: 860px) {
+        .split {
+          grid-template-columns: 1fr 1.15fr;
+        }
+        .split.rev {
+          grid-template-columns: 1.15fr 1fr;
+        }
+        .split.eq {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .screen {
+        width: 100%;
+        max-height: min(56vh, 500px);
+        object-fit: contain;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .screen.tall {
+        max-height: min(62vh, 560px);
+      }
+      .chart {
+        width: 100%;
+        max-height: min(38vh, 320px);
+        object-fit: contain;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #0d1210;
+      }
+      .vs {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 0.65rem;
+        align-items: center;
+      }
+      .vs .mid {
+        font-family: var(--fm);
+        font-size: 0.68rem;
+        color: var(--harvest);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+      }
+      .pill {
+        font-family: var(--fm);
+        font-size: 0.58rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.3rem 0.55rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+      .pill.on {
+        color: var(--accent);
+        border-color: rgba(61, 214, 195, 0.4);
+      }
+      .pill.ok {
+        color: var(--healthy);
+        border-color: rgba(62, 207, 142, 0.4);
+      }
+      .pill.bad {
+        color: var(--danger);
+        border-color: rgba(224, 112, 96, 0.4);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .slide.active {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress" id="progress"></div>
+    <div class="deck" id="deck">
+      <!-- 1 Title -->
+      <section class="slide active">
+        <p class="sec">Workflow demo · SP Jain MAIB · Group 3</p>
+        <div class="fill">
+          <p class="brand">Annadata</p>
+          <h1>End-to-end farmer workflow — live prototype walkthrough</h1>
+          <p class="lead">
+            Inspect leaf &amp; produce · grade &amp; price · simulate yield ·
+            list on market · advisory · insights · ethics
+          </p>
+          <p class="meta">
+            <b>Group 3</b> — Aftaab · Isaac · Ishaan
+          </p>
+          <div class="card hi" style="max-width: 28rem; margin-top: 0.5rem">
+            <p class="lbl">Live app</p>
+            <p style="font-family: var(--fm); color: var(--accent); margin-top: 0.35rem; font-size: 0.9rem">
+              https://annadata-lake.vercel.app
+            </p>
+            <p style="font-family: var(--fm); color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem">
+              http://localhost:5173
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2 Agenda -->
+      <section class="slide">
+        <p class="sec">01 · Agenda</p>
+        <h2>What we will walk through</h2>
+        <div class="fill">
+          <div class="toc">
+            <div><span>02</span> Why two CV models</div>
+            <div><span>03</span> Landing &amp; navigation</div>
+            <div><span>04–07</span> Leaf health inspect</div>
+            <div><span>08–11</span> Produce quality inspect</div>
+            <div><span>12–13</span> Yield simulator</div>
+            <div><span>14</span> Mandi prices</div>
+            <div><span>15</span> Market + Grade Card</div>
+            <div><span>16–17</span> Crop &amp; fertilizer advisory</div>
+            <div><span>18–23</span> Insights KPIs &amp; training charts</div>
+            <div><span>24</span> Ethics &amp; HITL</div>
+            <div><span>25</span> End-to-end path</div>
+            <div><span>26</span> Q&amp;A</div>
+          </div>
+          <p class="callout" style="margin-top: 0.5rem">
+            <b>Every process step</b> uses real app screenshots captured from the live prototype — not mockups.
+          </p>
+        </div>
+      </section>
+
+      <!-- 3 Why two CV -->
+      <section class="slide">
+        <p class="sec">02 · Architecture choice</p>
+        <h2>Why two computer-vision jobs? Leaf ≠ Produce</h2>
+        <div class="fill">
+          <div class="vs">
+            <div>
+              <p class="tag ok">Leaf health</p>
+              <img class="screen" src="screens/02_inspect_leaf_ready.png" alt="Leaf inspect mode" />
+              <p class="lbl" style="margin-top: 0.4rem">On-plant disease · 3 classes</p>
+            </div>
+            <p class="mid">≠</p>
+            <div>
+              <p class="tag gold">Produce quality</p>
+              <img class="screen" src="screens/04_inspect_produce_ready.png" alt="Produce inspect mode" />
+              <p class="lbl" style="margin-top: 0.4rem">Post-harvest spoilage · 3 classes</p>
+            </div>
+          </div>
+          <div class="g3" style="margin-top: 0.5rem">
+            <div class="card ok">
+              <h3>Leaf model</h3>
+              <p>PlantVillage · EfficientNetB0 winner · <strong style="color: var(--healthy)">97.4%</strong></p>
+            </div>
+            <div class="card warn">
+              <h3>Produce model</h3>
+              <p>Fresh/Borderline/Spoiled · ResNet50 winner · <strong style="color: var(--harvest)">~97% acc / 97.1% F1</strong></p>
+            </div>
+            <div class="card hi">
+              <h3>Same Inspect screen</h3>
+              <p>User toggles mode — each task gets its own trained model, not one confused classifier</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 Landing -->
+      <section class="slide">
+        <p class="sec">03 · App entry</p>
+        <h2>Landing — one hub for the rural processor</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div>
+              <p class="lead" style="margin-top: 0">
+                The farmer opens Annadata and picks a workflow: inspect a leaf or
+                produce batch, check mandi prices, simulate yield, list graded stock,
+                or get crop/fertilizer advice.
+              </p>
+              <div class="pill-row" style="margin-top: 0.65rem">
+                <span class="pill on">Inspect</span>
+                <span class="pill on">Yield</span>
+                <span class="pill on">Prices</span>
+                <span class="pill on">Market</span>
+                <span class="pill on">Advisory</span>
+                <span class="pill on">Insights</span>
+                <span class="pill on">Ethics</span>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/01_landing.png" alt="Annadata landing page" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 Leaf upload -->
+      <section class="slide">
+        <p class="sec">04 · Leaf health</p>
+        <h2>Step 1 — Upload a leaf photo</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div class="steps" style="counter-reset: s">
+              <div class="step"><strong>Select Leaf mode</strong><span>Toggle from Produce on the Inspect screen</span></div>
+              <div class="step"><strong>Upload or camera</strong><span>Phone photo of a crop leaf in the field or line</span></div>
+              <div class="step"><strong>Run inference</strong><span>TFLite EfficientNetB0 runs in-browser — no server round-trip</span></div>
+            </div>
+            <img class="screen tall" src="screens/02_inspect_leaf_ready.png" alt="Leaf inspect ready to upload" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 Leaf result -->
+      <section class="slide">
+        <p class="sec">05 · Leaf outcome</p>
+        <h2>Three leaf classes — what the model returns</h2>
+        <div class="fill">
+          <div class="split eq">
+            <div>
+              <div class="g3" style="grid-template-columns: 1fr">
+                <div class="card ok">
+                  <p class="tag ok">Healthy</p>
+                  <h3>HEALTHY</h3>
+                  <p>No actionable disease — continue normal schedule; low yield risk</p>
+                </div>
+                <div class="card warn">
+                  <p class="tag gold">Surface</p>
+                  <h3>SURFACE_DEFECT</h3>
+                  <p>Cosmetic or early stress — monitor, adjust handling, optional fungicide scout</p>
+                </div>
+                <div class="card bad">
+                  <p class="tag bad">Disease</p>
+                  <h3>BLIGHT_MOLD</h3>
+                  <p>Active blight/mold — treatment advice shown; feeds higher defect rate into Yield</p>
+                </div>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/03_leaf_result.png" alt="Leaf inspect result with treatment advice" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 Leaf to Yield -->
+      <section class="slide">
+        <p class="sec">06 · Leaf → Yield link</p>
+        <h2>Treatment advice + optional yield handoff</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div>
+              <p class="callout">
+                A <b>BLIGHT_MOLD</b> or <b>SURFACE_DEFECT</b> result maps to a
+                <b>disease-risk defect rate</b> that auto-fills the Yield simulator —
+                no re-typing by the operator.
+              </p>
+              <div class="flow" style="margin-top: 0.65rem">
+                <span class="node ok">Leaf CV</span><span class="arr">→</span>
+                <span class="node">Treatment tips</span><span class="arr">→</span>
+                <span class="node hi">Defect %</span><span class="arr">→</span>
+                <span class="node hi">Yield sim</span>
+              </div>
+              <p class="lbl" style="margin-top: 0.65rem">Leaf hold-out: 97.4% · EfficientNetB0 (5 architectures compared)</p>
+            </div>
+            <img class="screen tall" src="screens/08_yield_simulator.png" alt="Yield simulator with CV auto-filled defect rate" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 8 Produce upload -->
+      <section class="slide">
+        <p class="sec">07 · Produce quality</p>
+        <h2>Step 1 — Upload a produce photo</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div>
+              <p class="lead" style="margin-top: 0">
+                Switch to <b>Produce</b> mode for post-harvest batches — grains,
+                fruit, vegetables on the sorting line or in a tray photo.
+              </p>
+              <div class="card hi" style="margin-top: 0.65rem">
+                <p class="tag">Model</p>
+                <h3>ResNet50 winner</h3>
+                <p>Beats MobileNetV2 &amp; EfficientNetB0 on hold-out · ~97% acc · 97.1% F1</p>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/04_inspect_produce_ready.png" alt="Produce inspect ready" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 9 Produce fresh -->
+      <section class="slide">
+        <p class="sec">08 · Fresh outcome</p>
+        <h2>Fresh → Grade A/B — price premium</h2>
+        <div class="fill">
+          <div class="split eq">
+            <div>
+              <div class="card ok">
+                <p class="tag ok">Fresh</p>
+                <h3>Grade A or B</h3>
+                <p>High confidence fresh batch maps to top grades — mandi fair-price rule applies a <strong style="color: var(--healthy)">premium</strong> over baseline</p>
+              </div>
+              <div class="card" style="margin-top: 0.55rem">
+                <p class="tag">Also auto-fills</p>
+                <h3>Yield &amp; Market</h3>
+                <p>Grade and defect % flow into Yield simulator and Market Grade Card without re-entry</p>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/05_produce_fresh_result.png" alt="Produce fresh result Grade A" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 Produce spoiled -->
+      <section class="slide">
+        <p class="sec">09 · Spoiled outcome</p>
+        <h2>Spoiled / Borderline → Grade C — discount</h2>
+        <div class="fill">
+          <div class="split eq">
+            <div>
+              <div class="card bad">
+                <p class="tag bad">Spoiled</p>
+                <h3>Grade C</h3>
+                <p>Spoilage or borderline quality triggers a <strong style="color: var(--danger)">discount</strong> on the fair-price calculator — honest grading protects buyer trust</p>
+              </div>
+              <div class="card warn" style="margin-top: 0.55rem">
+                <p class="tag gold">HITL note</p>
+                <h3>Confidence &lt; 70%</h3>
+                <p>Low-confidence spoil calls are flagged — supervisor must confirm before market listing</p>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/06_produce_spoiled_result.png" alt="Produce spoiled result Grade C" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 Next actions -->
+      <section class="slide">
+        <p class="sec">10 · After inspect</p>
+        <h2>Next actions — Price · Yield · Market · Assistant</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div>
+              <p class="lead" style="margin-top: 0">
+                Once graded, the operator jumps straight to the next decision —
+                no copy-paste between screens.
+              </p>
+              <div class="steps row4" style="counter-reset: s; margin-top: 0.65rem">
+                <div class="step"><strong>Price</strong><span>Mandi fair ₹ for this grade</span></div>
+                <div class="step"><strong>Yield</strong><span>Simulate line with defect %</span></div>
+                <div class="step"><strong>Market</strong><span>List lot with Grade Card</span></div>
+                <div class="step"><strong>Assistant</strong><span>Crop / fert advisory</span></div>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/07_produce_next_actions.png" alt="Produce inspect next action buttons" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 12 Yield sim -->
+      <section class="slide">
+        <p class="sec">11 · Yield</p>
+        <h2>Yield simulator — CV auto-fills defect &amp; grade</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div>
+              <p class="callout">
+                Seven process parameters — moisture, RPM, temperature, grade,
+                defect rate, batch size, line speed — drive predicted
+                <b>yield %</b> and <b>throughput kg/h</b>.
+              </p>
+              <p class="lbl" style="margin-top: 0.55rem">Yield MAPE on hold-out: 3.52%</p>
+            </div>
+            <img class="screen tall" src="screens/08_yield_simulator.png" alt="Yield simulator baseline scenario" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 Yield optimal -->
+      <section class="slide">
+        <p class="sec">12 · Optimize</p>
+        <h2>Optimal scenario — one-click playbook</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div>
+              <div class="g2" style="grid-template-columns: 1fr">
+                <div class="card">
+                  <p class="tag">Stressed</p>
+                  <h3>Worst-case line</h3>
+                  <p>High defects · wet input · low RPM</p>
+                </div>
+                <div class="card hi">
+                  <p class="tag">Optimal</p>
+                  <h3>Best throughput</h3>
+                  <p>Flags bottleneck · suggests parameter shifts · Beans pilot 94.2%</p>
+                </div>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/09_yield_optimal.png" alt="Yield optimal scenario" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 14 Prices -->
+      <section class="slide">
+        <p class="sec">13 · Pricing</p>
+        <h2>Mandi prices — grade-linked fair ₹</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div>
+              <p class="lead" style="margin-top: 0">
+                Live mandi reference prices with Grade A/B/C premium or discount
+                applied — same grade language as Inspect and Market.
+              </p>
+              <div class="card hi" style="margin-top: 0.65rem">
+                <p class="num gold">3.4%</p>
+                <p class="lbl">Price forecast MAPE (hold-out)</p>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/10_prices.png" alt="Mandi prices screen" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 15 Market -->
+      <section class="slide">
+        <p class="sec">14 · Market</p>
+        <h2>Market listing with Grade Card</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div>
+              <p class="lead" style="margin-top: 0">
+                Seller lists a lot with the CV-derived grade, confidence, and
+                fair price badge — buyers see a consistent Grade Card, not a vague description.
+              </p>
+              <div class="flow" style="margin-top: 0.65rem">
+                <span class="node">Inspect grade</span><span class="arr">→</span>
+                <span class="node hi">Grade Card</span><span class="arr">→</span>
+                <span class="node">Buyer trust</span>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/11_market.png" alt="Market listing with grade card" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 16 Crop advisory -->
+      <section class="slide">
+        <p class="sec">15 · Advisory</p>
+        <h2>Crop recommendation — 6 Annadata SKUs</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div>
+              <p class="lead" style="margin-top: 0">
+                Enter soil N/P/K, pH, rainfall, temperature — random forest
+                recommends the best crop among six local SKUs, exported to ONNX for in-browser inference.
+              </p>
+              <div class="card ok" style="margin-top: 0.65rem">
+                <p class="num ok">96.74%</p>
+                <p class="lbl">Hold-out accuracy · RF → ONNX</p>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/12_advisory_crop.png" alt="Crop recommendation advisory" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 17 Fertilizer -->
+      <section class="slide">
+        <p class="sec">16 · Advisory</p>
+        <h2>Fertilizer recommendation — same 6 SKUs</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div>
+              <p class="lead" style="margin-top: 0">
+                Given crop type and soil metrics, the model suggests a fertilizer
+                mix — advisory guidance, not a legal prescription.
+              </p>
+              <div class="card warn" style="margin-top: 0.65rem">
+                <p class="num gold">84.44%</p>
+                <p class="lbl">Hold-out accuracy · RF → ONNX (honest ceiling)</p>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/13_advisory_fertilizer.png" alt="Fertilizer recommendation advisory" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 18 Insights KPIs -->
+      <section class="slide">
+        <p class="sec">17 · Insights</p>
+        <h2>Session KPIs — measured hold-out numbers</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div class="g2" style="grid-template-columns: 1fr 1fr">
+              <div class="card"><p class="num ok">97.4%</p><p class="lbl">Leaf CV</p></div>
+              <div class="card hi"><p class="num">97.0%</p><p class="lbl">Produce CV</p></div>
+              <div class="card"><p class="num ok">96.74%</p><p class="lbl">Crop rec</p></div>
+              <div class="card"><p class="num gold">84.44%</p><p class="lbl">Fertilizer</p></div>
+              <div class="card"><p class="num gold">3.52%</p><p class="lbl">Yield MAPE</p></div>
+              <div class="card"><p class="num gold">3.4%</p><p class="lbl">Price MAPE</p></div>
+            </div>
+            <img class="screen" src="screens/14_insights_kpis.png" alt="Insights KPI dashboard" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 19 Insights charts UI -->
+      <section class="slide">
+        <p class="sec">18 · Insights</p>
+        <h2>Training charts in the app</h2>
+        <div class="fill">
+          <div class="split rev">
+            <p class="lead" style="margin-top: 0">
+              The Insights page surfaces bake-off charts and confusion matrices
+              from our Colab training runs — same numbers we report in this deck.
+            </p>
+            <img class="screen tall" src="screens/15_insights_charts.png" alt="Insights training charts view" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 20 Leaf training -->
+      <section class="slide">
+        <p class="sec">19 · Training · Leaf CV</p>
+        <h2>PlantVillage bake-off — EfficientNetB0 wins</h2>
+        <div class="fill">
+          <div class="g2">
+            <img class="chart" src="charts/08_pv_model_comparison.png" alt="PlantVillage model comparison" />
+            <img class="chart" src="charts/09_pv_confusion_matrix.png" alt="PlantVillage confusion matrix" />
+          </div>
+          <p class="lbl">97.4% hold-out · 5 architectures compared · SKU-level accuracy in charts/10_pv_sku_accuracy.png</p>
+        </div>
+      </section>
+
+      <!-- 21 Produce training -->
+      <section class="slide">
+        <p class="sec">20 · Training · Produce CV</p>
+        <h2>Produce quality bake-off — ResNet50 wins</h2>
+        <div class="fill">
+          <div class="g2">
+            <img class="chart" src="charts/11_produce_model_comparison.png" alt="Produce model comparison" />
+            <img class="chart" src="charts/12_produce_confusion_matrix.png" alt="Produce confusion matrix" />
+          </div>
+          <p class="lbl">~97% accuracy · 97.1% F1 · ResNet50 vs MobileNetV2 &amp; EfficientNetB0</p>
+        </div>
+      </section>
+
+      <!-- 22 Yield & tabular training -->
+      <section class="slide">
+        <p class="sec">21 · Training · Yield &amp; tabular</p>
+        <h2>Yield regression + advisory RF models</h2>
+        <div class="fill">
+          <div class="g2">
+            <img class="chart" src="charts/04_yield_model_comparison.png" alt="Yield model comparison" />
+            <img class="chart" src="charts/06_shap_importance.png" alt="SHAP feature importance" />
+          </div>
+          <div class="g2" style="margin-top: 0.5rem">
+            <img class="chart" src="charts/02_model_comparison.png" alt="Tabular model comparison" />
+            <img class="chart" src="charts/03_confusion_matrix.png" alt="Tabular confusion matrix" />
+          </div>
+          <p class="lbl">Yield MAPE 3.52% · Crop 96.74% · Fertilizer 84.44%</p>
+        </div>
+      </section>
+
+      <!-- 23 Ethics -->
+      <section class="slide">
+        <p class="sec">22 · Ethics</p>
+        <h2>Human-in-the-loop — automation without skill erasure</h2>
+        <div class="fill">
+          <div class="split rev">
+            <div class="g2" style="grid-template-columns: 1fr">
+              <div class="card hi">
+                <p class="tag gold">HITL &lt; 70%</p>
+                <h3>Human owns the call</h3>
+                <p>Low confidence blocks market list until supervisor reviews</p>
+              </div>
+              <div class="card">
+                <p class="tag">Skill elevation</p>
+                <h3>Sorter → validator · negotiator</h3>
+                <p>AI drafts grade; people sell, advise, and decide</p>
+              </div>
+              <div class="card">
+                <p class="tag bad">Honest risk</p>
+                <h3>Displacement is possible</h3>
+                <p>Business case = less waste (₹), not payroll cuts</p>
+              </div>
+            </div>
+            <img class="screen tall" src="screens/16_ethics.png" alt="Ethics and employment page" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 24 End-to-end -->
+      <section class="slide">
+        <p class="sec">23 · Summary</p>
+        <h2>End-to-end path — one continuous workflow</h2>
+        <div class="fill">
+          <div class="steps row6" style="counter-reset: s">
+            <div class="step"><strong>Inspect leaf</strong><span>Disease class → treatment</span></div>
+            <div class="step"><strong>Inspect produce</strong><span>Fresh/spoiled → grade</span></div>
+            <div class="step"><strong>Price</strong><span>Grade-linked mandi ₹</span></div>
+            <div class="step"><strong>Yield</strong><span>CV-filled sim → optimal</span></div>
+            <div class="step"><strong>Market</strong><span>Grade Card listing</span></div>
+            <div class="step"><strong>Advisory</strong><span>Crop + fertilizer</span></div>
+          </div>
+          <div class="flow" style="margin-top: 0.85rem; justify-content: center">
+            <span class="node ok">CV quality</span><span class="arr">→</span>
+            <span class="node hi">Grade A/B/C</span><span class="arr">→</span>
+            <span class="node">Fair price</span><span class="arr">→</span>
+            <span class="node hi">Yield %</span><span class="arr">→</span>
+            <span class="node">Market trust</span><span class="arr">→</span>
+            <span class="node ok">HITL ethics</span>
+          </div>
+          <p class="callout" style="margin-top: 0.75rem; max-width: 40rem">
+            <b>Beans pilot:</b> 94.2% line validation · every model number above is from measured hold-out runs, not demo placeholders.
+          </p>
+        </div>
+      </section>
+
+      <!-- 25 Close -->
+      <section class="slide">
+        <p class="sec">24 · Close</p>
+        <div class="fill">
+          <h1>Questions?</h1>
+          <p class="lead">
+            Annadata — inspect honestly, price fairly, optimize the line, keep
+            humans in the loop.
+          </p>
+          <div class="card hi" style="max-width: 28rem; margin-top: 0.75rem">
+            <p class="lbl">Try it live</p>
+            <p style="font-family: var(--fm); color: var(--accent); margin-top: 0.35rem; font-size: 0.9rem">
+              https://annadata-lake.vercel.app
+            </p>
+            <p style="font-family: var(--fm); color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem">
+              http://localhost:5173
+            </p>
+          </div>
+          <p class="meta"><b>Group 3</b> · Aftaab · Isaac · Ishaan · SP Jain MAIB</p>
+        </div>
+      </section>
+    </div>
+
+    <div class="chrome">
+      <p class="hint">Annadata · Group 3 · Workflow Demo</p>
+      <div class="dots" id="dots"></div>
+      <div class="nav">
+        <p class="hint" id="page">1 / 25</p>
+        <button type="button" id="prev">Prev</button>
+        <button type="button" id="next">Next</button>
+      </div>
+    </div>
+
+    <script>
+      const slides = [...document.querySelectorAll('.slide')]
+      const dots = document.getElementById('dots')
+      const page = document.getElementById('page')
+      const bar = document.getElementById('progress')
+      let i = 0
+
+      slides.forEach((_, idx) => {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.className = 'dot' + (idx === 0 ? ' on' : '')
+        b.setAttribute('aria-label', 'Slide ' + (idx + 1))
+        b.onclick = () => go(idx)
+        dots.appendChild(b)
+      })
+
+      function go(n) {
+        i = (n + slides.length) % slides.length
+        slides.forEach((s, idx) => s.classList.toggle('active', idx === i))
+        ;[...dots.children].forEach((d, idx) => d.classList.toggle('on', idx === i))
+        page.textContent = i + 1 + ' / ' + slides.length
+        bar.style.width = ((i + 1) / slides.length) * 100 + '%'
+      }
+
+      document.getElementById('prev').onclick = () => go(i - 1)
+      document.getElementById('next').onclick = () => go(i + 1)
+      window.addEventListener('keydown', (e) => {
+        if (['ArrowRight', ' ', 'PageDown', 'Enter'].includes(e.key)) {
+          e.preventDefault()
+          go(i + 1)
+        }
+        if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) {
+          e.preventDefault()
+          go(i - 1)
+        }
+        if (e.key === 'Home') go(0)
+        if (e.key === 'End') go(slides.length - 1)
+      })
+      document.getElementById('deck').addEventListener('click', (e) => {
+        if (e.target.closest('button')) return
+        go(e.clientX >= innerWidth / 2 ? i + 1 : i - 1)
+      })
+      go(0)
+    </script>
+  </body>
+</html>

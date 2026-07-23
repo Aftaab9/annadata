@@ -434,7 +434,7 @@ rf.fit(Xtr, ytr)
 acc = accuracy_score(yte, rf.predict(Xte))
 print("hold-out accuracy", acc)
 print(classification_report(yte, rf.predict(Xte), target_names=le.classes_))
-onnx_model = convert_sklearn(rf, initial_types=[("float_input", FloatTensorType([None, 7]))], target_opset=12)
+onnx_model = convert_sklearn(rf, initial_types=[("float_input", FloatTensorType([None, 7]))], target_opset=12, options={type(rf): {"zipmap": False}})
 (OUT / "crop_rec.onnx").write_bytes(onnx_model.SerializeToString())
 meta = {"features": FEATURES, "classes": list(le.classes_), "accuracy": round(float(acc)*100, 2)}
 (OUT / "crop_rec_meta.json").write_text(json.dumps(meta, indent=2))
@@ -504,7 +504,7 @@ rf.fit(Xtr, ytr)
 acc = accuracy_score(yte, rf.predict(Xte))
 print("accuracy", acc)
 print(classification_report(yte, rf.predict(Xte), target_names=y_le.classes_))
-onnx_model = convert_sklearn(rf, initial_types=[("float_input", FloatTensorType([None, 8]))], target_opset=12)
+onnx_model = convert_sklearn(rf, initial_types=[("float_input", FloatTensorType([None, 8]))], target_opset=12, options={type(rf): {"zipmap": False}})
 (OUT / "fertilizer.onnx").write_bytes(onnx_model.SerializeToString())
 meta = {"features": list(X.columns), "classes": list(y_le.classes_),
         "soil_classes": list(soil_le.classes_), "crop_classes": list(crop_le.classes_),

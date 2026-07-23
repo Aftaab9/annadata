@@ -1,6 +1,6 @@
 /**
  * Browser ONNX Runtime for Colab-exported sklearn RandomForest models.
- * Falls back silently when artifacts missing.
+ * Models must expose dense float probability tensors (zipmap=False / ZipMap stripped).
  */
 // @ts-expect-error onnxruntime-web package exports typings oddly under bundler resolution
 import * as ort from 'onnxruntime-web'
@@ -58,42 +58,37 @@ async function loadBundle(
   }
 }
 
-function parseProbs(raw: unknown, nClasses: number): number[] {
-  const probs = new Array(nClasses).fill(0)
-  if (Array.isArray(raw) && raw.length > 0) {
-    const row = raw[0]
-    if (row && typeof row === 'object' && !Array.isArray(row)) {
-      for (const [k, v] of Object.entries(row as Record<string, number>)) {
-        const idx = Number(k)
-        if (!Number.isNaN(idx) && idx >= 0 && idx < nClasses) {
-          probs[idx] = Number(v) || 0
-        }
-      }
-      return probs
-    }
-    if (Array.isArray(row)) {
-      for (let i = 0; i < Math.min(nClasses, row.length); i++) {
-        probs[i] = Number(row[i]) || 0
-      }
-      return probs
-    }
-  }
-  if (raw && typeof raw === 'object' && 'data' in (raw as object)) {
-    const data = Array.from((raw as { data: ArrayLike<number> }).data)
-    for (let i = 0; i < Math.min(nClasses, data.length); i++) {
-      probs[i] = Number(data[i]) || 0
-    }
-  }
-  return probs
-}
-
 function parseLabel(raw: unknown): number {
   if (typeof raw === 'number') return raw
-  if (Array.isArray(raw)) return Number(raw[0]) || 0
+  if (typeof raw === 'bigint') return Number(raw)
+  if (typeof raw === 'string') {
+    const n = Number(raw)
+    return Number.isNaN(n) ? 0 : n
+  }
+  if (Array.isArray(raw)) return parseLabel(raw[0])
   if (raw && typeof raw === 'object' && 'data' in (raw as object)) {
-    return Number((raw as { data: ArrayLike<number> }).data[0]) || 0
+    return parseLabel((raw as { data: ArrayLike<unknown> }).data[0])
   }
   return 0
+}
+
+/** Dense float probs from TreeEnsembleClassifier — shape [1, n_classes] or flat. */
+function parseDenseProbs(raw: unknown, nClasses: number): number[] {
+  const probs = new Array(nClasses).fill(0)
+  let data: number[] = []
+
+  if (raw && typeof raw === 'object' && 'data' in (raw as object)) {
+    data = Array.from((raw as { data: ArrayLike<number> }).data).map(Number)
+  } else if (Array.isArray(raw)) {
+    const row = raw[0]
+    if (Array.isArray(row)) data = row.map(Number)
+    else if (typeof row === 'number') data = raw.map(Number)
+  }
+
+  for (let i = 0; i < Math.min(nClasses, data.length); i++) {
+    probs[i] = data[i] ?? 0
+  }
+  return probs
 }
 
 export async function runClassifierOnnx(
@@ -110,39 +105,51 @@ export async function runClassifierOnnx(
   const bundle = await loadBundle(modelUrl, metaUrl)
   if (!bundle) return null
 
-  const inputName = bundle.session.inputNames[0] ?? 'float_input'
-  const tensor = new ort.Tensor(
-    'float32',
-    Float32Array.from(features),
-    [1, features.length],
-  )
-  const feeds: Record<string, ort.Tensor> = { [inputName]: tensor }
-  const out = await bundle.session.run(feeds)
+  try {
+    const inputName = bundle.session.inputNames[0] ?? 'float_input'
+    const tensor = new ort.Tensor(
+      'float32',
+      Float32Array.from(features),
+      [1, features.length],
+    )
+    const feeds: Record<string, ort.Tensor> = { [inputName]: tensor }
 
-  const labelKey =
-    (bundle.session.outputNames as string[]).find((n) =>
-      n.includes('label'),
-    ) ?? bundle.session.outputNames[0]!
-  const probKey = (bundle.session.outputNames as string[]).find((n) =>
-    n.includes('prob'),
-  )
+    const names = bundle.session.outputNames as string[]
+    const labelKey =
+      names.find((n) => n.toLowerCase().includes('label')) ?? names[0]!
+    const probKey = names.find((n) => n.toLowerCase().includes('prob'))
 
-  const classIndex = parseLabel(out[labelKey])
-  const n = bundle.meta.classes.length
-  let probabilities = probKey ? parseProbs(out[probKey], n) : []
-  if (!probabilities.length || probabilities.every((p) => p === 0)) {
-    probabilities = new Array(n).fill(0)
-    if (classIndex >= 0 && classIndex < n) probabilities[classIndex] = 1
-  }
-  const confidence = probabilities[classIndex] ?? 1
-  const className = bundle.meta.classes[classIndex] ?? String(classIndex)
+    const out = await bundle.session.run(feeds)
+    const n = bundle.meta.classes.length
 
-  return {
-    classIndex,
-    className,
-    confidence,
-    probabilities,
-    meta: bundle.meta,
+    let probabilities = probKey ? parseDenseProbs(out[probKey], n) : []
+    let classIndex = parseLabel(out[labelKey])
+
+    if (!probabilities.length || probabilities.every((p) => p === 0)) {
+      probabilities = new Array(n).fill(0)
+      if (classIndex >= 0 && classIndex < n) probabilities[classIndex] = 1
+    } else {
+      // Prefer argmax of real RF votes over label tensor (keeps UI in sync with probs)
+      let best = 0
+      for (let i = 1; i < probabilities.length; i++) {
+        if ((probabilities[i] ?? 0) > (probabilities[best] ?? 0)) best = i
+      }
+      classIndex = best
+    }
+
+    const confidence = probabilities[classIndex] ?? 0
+    const className = bundle.meta.classes[classIndex] ?? String(classIndex)
+
+    return {
+      classIndex,
+      className,
+      confidence,
+      probabilities,
+      meta: bundle.meta,
+    }
+  } catch (e) {
+    console.warn('[onnx] inference failed', modelUrl, e)
+    return null
   }
 }
 
