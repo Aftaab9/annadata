@@ -1,0 +1,12 @@
+# START HERE — Faculty pack
+
+1. Open **FACULTY_GUIDE.md** (full map of the project).
+2. Live app: https://annadata-lake.vercel.app
+3. Live presentation: https://annadata-lake.vercel.app/presentation/workflow.html
+4. Offline presentation: open `presentation/workflow.html` in Chrome/Edge.
+5. Demo images to upload:
+   - Leaf: `agrosight/public/samples/leaf/`
+   - Produce: `agrosight/public/samples/produce/`
+6. Colab / training: `colab/` folder (`.ipynb` + `datasets/`).
+
+To run locally: `cd agrosight` → `npm install` → `npm run dev`
