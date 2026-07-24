@@ -1,24 +1,30 @@
-ANNADATA / AGROSIGHT — Faculty pack
-====================================
+ANNADATA — Turnitin / faculty submission (presentation pack)
+============================================================
+This ZIP is intentionally SMALL (~11 MB) so it fits Turnitin’s 100 MiB limit.
 
-LIVE APP
-  https://annadata-lake.vercel.app
+WHAT TO OPEN
+  1. Double-click  workflow.html  (Chrome or Edge)
+  2. Keys:  →  ←   or Space   or click left / right half of the screen
+  3. Speaking notes: SCRIPT_WORKFLOW.txt
 
-LIVE PRESENTATION (same deployment)
-  https://annadata-lake.vercel.app/presentation/workflow.html
+LINKS FOR FACULTY (also on the first & last slides)
+  Live app:          https://annadata-lake.vercel.app
+  Live presentation: https://annadata-lake.vercel.app/presentation/workflow.html
+  Full project ZIP:  https://github.com/Aftaab9/annadata
+                     → green “Code” button → “Download ZIP”
 
-OFFLINE ZIP (this folder)
-  1. Unzip anywhere
-  2. Open workflow.html in Chrome / Edge (double-click)
-  3. Navigate: → ←  or Space  or click left/right half of the screen
-  4. Speaking notes: SCRIPT_WORKFLOW.txt
+WHY NOT THE FULL PROJECT IN THIS ZIP?
+  The complete app includes TFLite models (~100 MB produce model alone) and
+  exceeds Turnitin’s 100 MiB cap. GitHub has the full source, models, Colab
+  notebooks, and sample images. After Download ZIP, open FACULTY_GUIDE.md.
 
-Demo samples on the live site
-  Produce: /samples/produce/ (fresh + rotten apples, tomatoes, maize, …)
-  Photos:  /photos/
-
-What faculty should click in the app
-  Inspect → Leaf Health (upload a leaf) → Produce Quality (upload fruit)
-  → Yield simulator → Prices → Market → Advisory → Insights → Ethics
+FILES IN THIS PACK
+  workflow.html          Main deck (real app screenshots + training KPIs)
+  SCRIPT_WORKFLOW.txt    One speaking paragraph per slide
+  screens/               Captured UI screenshots
+  charts/                Training comparison / confusion matrices
+  research.html          Longer research deck (optional)
+  index.html             Short problem pitch (optional)
+  README.txt             This file
 
 Group 3 · SP Jain MAIB · Aftaab · Isaac · Ishaan

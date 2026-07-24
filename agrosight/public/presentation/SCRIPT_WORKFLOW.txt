@@ -12,8 +12,9 @@ Good morning. We are Group 3 — Aftaab, Isaac, and Ishaan — presenting Annada
 also known as AgroSight. This deck is a workflow walkthrough of our live farmer
 prototype: how a rural processor moves from a phone photo to a grade, a fair
 mandi price, a yield simulation, and a market listing — with humans still in
-the loop. The live app is at annadata-lake.vercel.app; we also run it locally
-on port 5173 for demos.
+the loop. The live app is at annadata-lake.vercel.app. The complete source —
+models, Colab notebooks, sample images — is on GitHub at github.com/Aftaab9/annadata
+(Code → Download ZIP). FACULTY_GUIDE.md inside that repo maps every folder.
 
 --- SLIDE 2 · Agenda ---
 
@@ -167,7 +168,8 @@ loop. Beans pilot at 94.2% validates the yield line on real data.
 --- SLIDE 25 · Close / Q&A ---
 
 That is Annadata — inspect honestly, price fairly, optimize the line, keep
-humans in the loop. We are happy to take questions or do a live demo at
-annadata-lake.vercel.app. Thank you.
+humans in the loop. Live app: annadata-lake.vercel.app. Full project download:
+github.com/Aftaab9/annadata → Code → Download ZIP (then open FACULTY_GUIDE.md).
+We are happy to take questions. Thank you.
 
 ================================================================================
