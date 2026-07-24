@@ -1,8 +1,13 @@
-Produce Quality test images (harvested fruit/veg — NOT leaves)
+Produce Quality demo images
+===========================
+Upload on /inspect ? Produce Quality mode.
 
-Use Inspect ? Produce Quality, pick matching crop chip, upload from the *_fruit folder.
+Quick tests:
+  fresh_apple.jpg / apple_fruit/apple_fresh.jpg   ? Fresh / Grade A–B
+  rotten_apple.jpg / verify_rotten_apple.jpg      ? Spoiled / Grade C
+  dataset_fresh_*.jpeg / dataset_rotten_*.jpeg    ? more trials
 
-Folders (2+ fresh, 2+ rotten each):
-  apple_fruit, tomato_fruit, maize_fruit, potato_fruit, pepper_fruit, soybean_fruit
+SKU folders: apple_fruit, maize_fruit, tomato_fruit, potato_fruit, pepper_fruit, soybean_fruit
 
-Leaf disease samples stay in: apple/, maize/, soybean/, pepper/, tomato/, potato/
+Live:
+  https://annadata-lake.vercel.app/samples/produce/fresh_apple.jpg
